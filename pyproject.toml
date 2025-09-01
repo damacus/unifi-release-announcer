@@ -12,7 +12,7 @@ dependencies = [
     "pynacl>=1.5.0",
     "httpx>=0.28.0",
     "beautifulsoup4>=4.12.0",
-    "defusedxml",
+    "feedparser>=6.0.0",
 ]
 
 [project.optional-dependencies]
@@ -20,7 +20,6 @@ dev = [
     "pytest",
     "mypy",
     "ruff",
-    "types-defusedxml",
     "respx",
     "pytest-asyncio",
 ]

@@ -52,9 +52,9 @@ class ScraperFactory:
         if backend == "playwright":
             from scraper_backends.playwright_backend import PlaywrightBackend
             return PlaywrightBackend()
-        elif backend == "xml":
-            from scraper_backends.xml_backend import XMLBackend
-            return XMLBackend()
+        elif backend == "rss":
+            from scraper_backends.rss_backend import RSSBackend
+            return RSSBackend()
         else:
             raise ValueError(
                 f"Unsupported scraper backend: {backend}"
