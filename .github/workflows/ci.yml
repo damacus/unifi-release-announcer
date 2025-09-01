@@ -58,13 +58,13 @@ jobs:
 
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v5.8.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr,suffix=-beta
-            type=sha
+            type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
@@ -110,15 +110,13 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Tag and push release image
-        env:
-          RELEASE_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          VERSION_TAG: ${{ needs.release-please.outputs.tag-name }}
         run: |
           # Pull the latest image
-          docker pull ${RELEASE_IMAGE}:latest
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
           # Tag with version
-          docker tag ${RELEASE_IMAGE}:latest ${RELEASE_IMAGE}:${VERSION_TAG}
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+                     ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.release-please.outputs.tag-name }}
 
           # Push version tag
-          docker push ${RELEASE_IMAGE}:${VERSION_TAG}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.release-please.outputs.tag-name }}
