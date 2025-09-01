@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unifi-release-announcer
+  labels:
+    app: unifi-release-announcer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unifi-release-announcer
+  template:
+    metadata:
+      labels:
+        app: unifi-release-announcer
+    spec:
+      containers:
+        - name: unifi-release-announcer
+          # Replace with your actual image path, e.g., your-docker-hub-username/unifi-release-announcer:latest
+          image: unifi-release-announcer:latest
+          imagePullPolicy: IfNotPresent # Use "Always" if the image tag is frequently updated
+          envFrom:
+            - secretRef:
+                name: unifi-release-announcer-secrets

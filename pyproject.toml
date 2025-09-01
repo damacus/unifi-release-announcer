@@ -1,0 +1,35 @@
+[project]
+name = "unifi-release-announcer"
+version = "0.1.0"
+description = "Discord bot that announces new UniFi Protect releases"
+authors = [
+    {name = "damacus"}
+]
+requires-python = ">=3.11"
+dependencies = [
+    "discord.py",
+    "selenium",
+    "webdriver-manager",
+    "pynacl>=1.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "mypy",
+    "ruff",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "S", "B", "A", "C4", "T20"]
+ignore = ["E501"]  # Line too long (handled by formatter)
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

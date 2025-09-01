@@ -1,0 +1,13 @@
+{
+  "release-type": "simple",
+  "packages": {
+    ".": {
+      "package-name": "unifi-release-announcer",
+      "changelog-sections": [
+        {"type": "feat", "section": "Features"},
+        {"type": "fix", "section": "Bug Fixes"},
+        {"type": "chore", "section": "Miscellaneous", "hidden": false}
+      ]
+    }
+  }
+}

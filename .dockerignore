@@ -1,0 +1,14 @@
+# Exclude virtual environment
+.venv/
+
+# Exclude Python cache
+__pycache__/
+*.pyc
+
+# Exclude IDE and local development files
+.idea/
+.vscode/
+
+# Exclude Docker files from the context
+Dockerfile
+.dockerignore
