@@ -3,7 +3,7 @@ import sys
 import discord
 import logging
 from discord.ext import tasks
-from scraper import Release, get_latest_release
+from scraper_interface import Release, get_latest_release
 
 # --- Configuration ---
 logging.basicConfig(
@@ -132,7 +132,7 @@ async def check_for_updates() -> None:
     """Periodically checks for new releases and posts them."""
     logging.info("Checking for new UniFi releases...")
 
-    latest_release = get_latest_release()
+    latest_release = await get_latest_release()
     if not latest_release:
         logging.info("No new release found or failed to fetch.")
         return

@@ -27,7 +27,11 @@ jobs:
         run: uv sync
 
       - name: Run tests
-        run: uv run python -m pytest test_scraper.py -v
+        run: |
+          uv run python -m pytest \
+            test_scraper_interface.py \
+            test_integration.py \
+            -v
 
   build-and-push:
     needs: test

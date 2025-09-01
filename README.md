@@ -1,9 +1,15 @@
 # UniFi Release Announcer
 
-A Discord bot that monitors the Ubiquiti Community forums for new UniFi releases and automatically posts announcements to a Discord channel.
+A Discord bot that monitors UniFi community releases and posts announcements to a Discord channel.
 
 ## Features
 
+- **Modular Scraper Architecture**: Swappable backends for different scraping needs
+- **JavaScript Support**: Handles modern React SPAs with Playwright
+- **Lightweight Options**: httpx + BeautifulSoup for static content
+- **Legacy Support**: Selenium backend for compatibility
+- **Docker Ready**: Optimized container with Playwright dependencies
+- **Environment Configuration**: Easy backend switching via environment variables
 - 🔍 **Automatic Monitoring**: Checks for new UniFi releases every 10 minutes
 - 📱 **Platform Detection**: Automatically tags releases with platform-specific emojis (iOS 📱, Android 🤖, Desktop 💻)
 - 🎯 **Smart Filtering**: Only posts new releases, avoiding duplicates
