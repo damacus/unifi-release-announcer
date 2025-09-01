@@ -1,18 +1,16 @@
-"""
-Modular scraper interface for UniFi release announcements.
-Allows swapping between different scraping backends (Playwright, Selenium, etc.).
-"""
+"""Scraper backend interface."""
 
 import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
 class Release:
-    """Represents a UniFi release with title and URL."""
+    """
+    Represents a UniFi release with title and URL.
+    """
     title: str
     url: str
 
@@ -21,7 +19,7 @@ class ScraperBackend(ABC):
     """Abstract base class for scraper backends."""
 
     @abstractmethod
-    async def get_latest_release(self) -> Optional[Release]:
+    async def get_latest_release(self) -> Release | None:
         """
         Fetch the latest release matching configured keywords.
 
@@ -35,31 +33,38 @@ class ScraperFactory:
     """Factory for creating scraper backends."""
 
     @staticmethod
-    def create_scraper(backend: str = "playwright") -> ScraperBackend:
-        """
-        Create a scraper backend instance.
+    def create_scraper(
+        backend: str = "playwright",
+    ) -> ScraperBackend:
+        """Create a scraper backend instance.
 
         Args:
-            backend: Backend type ("playwright")
+            backend: The name of the scraper backend to create.
 
         Returns:
-            ScraperBackend instance
+            An instance of a ScraperBackend.
 
         Raises:
-            ValueError: If backend type is not supported
+            ValueError: If the backend is not supported.
         """
         backend = backend.lower()
 
         if backend == "playwright":
             from scraper_backends.playwright_backend import PlaywrightBackend
             return PlaywrightBackend()
+        elif backend == "xml":
+            from scraper_backends.xml_backend import XMLBackend
+            return XMLBackend()
         else:
-            raise ValueError(f"Unsupported scraper backend: {backend}")
+            raise ValueError(
+                f"Unsupported scraper backend: {backend}"
+            )
 
 
-async def get_latest_release(backend: Optional[str] = None) -> Optional[Release]:
-    """
-    Convenience function to get the latest release using configured backend.
+async def get_latest_release(
+    backend: str | None = None,
+) -> Release | None:
+    """Get the latest release.
 
     Args:
         backend: Override backend type from environment
@@ -74,5 +79,7 @@ async def get_latest_release(backend: Optional[str] = None) -> Optional[Release]
         scraper = ScraperFactory.create_scraper(backend)
         return await scraper.get_latest_release()
     except Exception as e:
-        logging.error(f"Error with {backend} scraper: {e}")
+        logging.error(
+            f"Error with {backend} scraper: {e}"
+        )
         return None

@@ -19,7 +19,9 @@ class TestScraperInterface(unittest.TestCase):
 
     def test_scraper_factory_playwright(self) -> None:
         """Test ScraperFactory creates Playwright backend."""
-        with patch('scraper_backends.playwright_backend.PlaywrightBackend') as mock_backend:
+        with patch(
+            'scraper_backends.playwright_backend.PlaywrightBackend'
+        ) as mock_backend:
             ScraperFactory.create_scraper("playwright")
             mock_backend.assert_called_once()
 
@@ -27,24 +29,31 @@ class TestScraperInterface(unittest.TestCase):
         """Test ScraperFactory raises error for unsupported backends."""
         with self.assertRaises(ValueError) as context:
             ScraperFactory.create_scraper("selenium")
-        self.assertIn("Unsupported scraper backend: selenium", str(context.exception))
-        
+        exception_str = str(context.exception)
+        self.assertIn("Unsupported scraper backend: selenium", exception_str)
+
         with self.assertRaises(ValueError) as context:
             ScraperFactory.create_scraper("httpx")
-        self.assertIn("Unsupported scraper backend: httpx", str(context.exception))
+        exception_str = str(context.exception)
+        self.assertIn("Unsupported scraper backend: httpx", exception_str)
 
     def test_scraper_factory_invalid_backend(self) -> None:
         """Test ScraperFactory raises error for invalid backend."""
         with self.assertRaises(ValueError) as context:
             ScraperFactory.create_scraper("invalid")
-        self.assertIn("Unsupported scraper backend: invalid", str(context.exception))
+        exception_str = str(context.exception)
+        self.assertIn("Unsupported scraper backend: invalid", exception_str)
 
     @patch.dict(os.environ, {"SCRAPER_BACKEND": "playwright"})
     @patch('scraper_interface.ScraperFactory.create_scraper')
-    def test_get_latest_release_uses_env_backend(self, mock_create: MagicMock) -> None:
+    def test_get_latest_release_uses_env_backend(
+        self, mock_create: MagicMock
+    ) -> None:
         """Test get_latest_release uses environment variable for backend."""
         mock_scraper = AsyncMock()
-        mock_scraper.get_latest_release.return_value = Release("Test", "https://test.com")
+        mock_scraper.get_latest_release.return_value = Release(
+            "Test", "https://test.com"
+        )
         mock_create.return_value = mock_scraper
 
         result = asyncio.run(get_latest_release())
@@ -53,10 +62,14 @@ class TestScraperInterface(unittest.TestCase):
         self.assertIsNotNone(result)
 
     @patch('scraper_interface.ScraperFactory.create_scraper')
-    def test_get_latest_release_override_backend(self, mock_create: MagicMock) -> None:
+    def test_get_latest_release_override_backend(
+        self, mock_create: MagicMock
+    ) -> None:
         """Test get_latest_release can override backend."""
         mock_scraper = AsyncMock()
-        mock_scraper.get_latest_release.return_value = Release("Test", "https://test.com")
+        mock_scraper.get_latest_release.return_value = Release(
+            "Test", "https://test.com"
+        )
         mock_create.return_value = mock_scraper
 
         result = asyncio.run(get_latest_release("selenium"))
@@ -65,7 +78,9 @@ class TestScraperInterface(unittest.TestCase):
         self.assertIsNotNone(result)
 
     @patch('scraper_interface.ScraperFactory.create_scraper')
-    def test_get_latest_release_handles_exception(self, mock_create: MagicMock) -> None:
+    def test_get_latest_release_handles_exception(
+        self, mock_create: MagicMock
+    ) -> None:
         """Test get_latest_release handles exceptions gracefully."""
         mock_create.side_effect = Exception("Backend error")
 
