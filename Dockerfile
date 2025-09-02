@@ -1,54 +1,33 @@
-FROM python:3.13-slim as builder
+FROM python:3.13-slim
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install system dependencies for Playwright
+# Install uv by copying the binary from the official image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Install system dependencies, create virtual environment, and install packages
+COPY pyproject.toml uv.lock ./
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
-    && rm -rf /var/lib/apt/lists/*
+    curl \
+    procps \
+    && rm -rf /var/lib/apt/lists/* \
+    && uv venv \
+    && uv sync \
+    && /app/.venv/bin/playwright install --with-deps chromium
 
-RUN pip install uv
-COPY pyproject.toml uv.lock ./
+# Set the path to include the virtual environment
+ENV PATH="/app/.venv/bin:$PATH"
 
-RUN uv pip install --system --no-cache -r pyproject.toml
+COPY scraper_backends/ /app/scraper_backends/
+COPY main.py /app/main.py
+COPY scraper_interface.py /app/scraper_interface.py
 
-# Install Playwright browsers
-RUN playwright install --with-deps chromium
-
-COPY . .
-
-FROM python:3.13-slim
-
-# Install runtime dependencies for Playwright
-RUN apt-get update && apt-get install -y \
-    libnss3 \
-    libnspr4 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libatspi2.0-0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libxss1 \
-    libasound2 \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
-COPY --from=builder /root/.cache/ms-playwright /root/.cache/ms-playwright
-COPY --from=builder /app /app
-
-# Set environment variable to use Playwright as default backend
+# Set environment variables
 ENV SCRAPER_BACKEND=playwright
 
-CMD ["python", "main.py"]
+CMD ["uv", "run", "main.py"]

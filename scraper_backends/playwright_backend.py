@@ -20,7 +20,7 @@ class PlaywrightBackend(ScraperBackend):
         """
         try:
             # Get keywords from environment or use default
-            keywords_str = os.getenv("RELEASE_KEYWORDS", "UniFi Protect")
+            keywords_str = os.getenv("RELEASE_KEYWORDS", "Protect")
             keywords = [k.strip() for k in keywords_str.split(",")]
 
             async with async_playwright() as p:

@@ -86,6 +86,9 @@ async def process_new_release(latest_release: Release) -> None:
                 name=f"UniFi Release: {latest_release.title}", content=message
             )
             logging.info("Posted to forum thread: %s", thread.thread.name)
+        elif isinstance(channel, discord.TextChannel):
+            await channel.send(message)
+            logging.info("Posted to text channel: %s", channel.name)
         else:
             logging.warning(
                 "Channel type %s is not explicitly supported.",
