@@ -5,20 +5,17 @@ A Discord bot that monitors UniFi community releases and posts announcements to 
 ## Features
 
 - **Modular Scraper Architecture**: Swappable backends for different scraping needs
-- **JavaScript Support**: Handles modern React SPAs with Playwright
-- **Lightweight Options**: httpx + BeautifulSoup for static content
-- **Legacy Support**: Selenium backend for compatibility
-- **Docker Ready**: Optimized container with Playwright dependencies
+- **GraphQL API**: Direct API access for reliable data fetching
+- **Docker Ready**: Optimized Alpine-based container (157MB)
 - **Environment Configuration**: Easy backend switching via environment variables
 - 🔍 **Automatic Monitoring**: Checks for new UniFi releases every 10 minutes
 - 📱 **Platform Detection**: Automatically tags releases with platform-specific emojis (iOS 📱, Android 🤖, Desktop 💻)
 - 🎯 **Smart Filtering**: Only posts new releases, avoiding duplicates
-- 🐳 **Docker Ready**: Containerized for easy deployment
 - ☸️ **Kubernetes Support**: Ready for deployment on k3s/Kubernetes clusters
 
 ## Prerequisites
 
-- Python 3.11+
+- Python 3.13
 - Discord Bot Token
 - Discord Channel ID where announcements will be posted
 
@@ -36,16 +33,17 @@ A Discord bot that monitors UniFi community releases and posts announcements to 
 2. **Install dependencies using uv**:
 
    ```bash
-   uv sync
+   uv sync --extra dev
    ```
 
-3. **Set environment variables**:
+3. **Configure environment variables**:
 
-   ```bash
-   export DISCORD_BOT_TOKEN="your_bot_token_here"
-   export DISCORD_CHANNEL_ID="your_channel_id_here"
-   # Optional: Filter for specific releases (e.g., Protect, Network)
-   # export RELEASE_KEYWORDS="Protect,Network"
+   Create a `.env` file in the project root:
+
+   ```env
+   DISCORD_BOT_TOKEN=your_discord_bot_token
+   DISCORD_CHANNEL_ID=your_discord_channel_id
+   SCRAPER_BACKEND=graphql  # or 'rss' if you prefer
    ```
 
 4. **Run the application**:
@@ -54,22 +52,40 @@ A Discord bot that monitors UniFi community releases and posts announcements to 
    uv run main.py
    ```
 
-### Docker Deployment
+### Docker Development
 
 1. **Build the Docker image**:
 
    ```bash
-   docker build -t unifi-release-announcer .
+   docker compose build
    ```
 
 2. **Run the container**:
 
    ```bash
-   docker run -e DISCORD_BOT_TOKEN="your_token" \
-              -e DISCORD_CHANNEL_ID="your_channel_id" \
-              -e RELEASE_KEYWORDS="Protect,Network" \
-              unifi-release-announcer
+   docker compose run announcer
    ```
+
+### Dev Container (Recommended for Development)
+
+For the best development experience, use the provided dev container configuration:
+
+1. **Prerequisites**:
+   - VS Code with the Dev Containers extension
+   - Docker Desktop
+
+2. **Open in Dev Container**:
+   - Open the project in VS Code
+   - Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac)
+   - Select "Dev Containers: Reopen in Container"
+   - Wait for the container to build and start
+
+3. **Features included**:
+   - Pre-configured Python environment with all dependencies
+   - GraphQL API support
+   - Python extensions (Black, Ruff, MyPy, Pytest)
+   - Volume mounts for live code editing
+   - Automatic dependency installation
 
 ### Kubernetes Deployment
 
@@ -79,10 +95,10 @@ See the [k8s/README.md](k8s/README.md) for detailed Kubernetes deployment instru
 
 ### Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DISCORD_BOT_TOKEN`  | Your Discord bot token                                                                                       | Yes      |
-| `DISCORD_CHANNEL_ID` | Discord channel ID for announcements                                                                         | Yes      |
+| Variable             | Description                                                                                                 | Required |
+|----------------------|-------------------------------------------------------------------------------------------------------------|----------|
+| `DISCORD_BOT_TOKEN`  | Your Discord bot token                                                                                      | Yes      |
+| `DISCORD_CHANNEL_ID` | Discord channel ID for announcements                                                                        | Yes      |
 | `RELEASE_KEYWORDS`   | Comma-separated list of keywords to filter releases (e.g., "Protect,Network"). Defaults to "UniFi Protect". | No       |
 
 ### Discord Bot Setup
@@ -99,7 +115,7 @@ See the [k8s/README.md](k8s/README.md) for detailed Kubernetes deployment instru
 1. **Scraping**: The bot scrapes the Ubiquiti Community forums for the latest UniFi releases
 2. **Comparison**: It compares the latest release URL with the previously posted one (stored in `last_release_url.txt`)
 3. **Posting**: If a new release is found, it formats a message with platform tags and posts to Discord
-4. **State Management**: Updates the stored URL to prevent duplicate posts
+4. **State Management**: Updates the stored URL to prevent duplicate posts (stored in `last_release_url.txt`)
 
 ## Message Format
 
@@ -123,23 +139,28 @@ Platform tags:
 ### Project Structure
 
 ```markdown
-├── main.py              # Main Discord bot application
-├── scraper.py           # Web scraping logic
-├── test_scraper.py      # Unit tests
-├── pyproject.toml       # Project dependencies
-├── Dockerfile           # Container configuration
-├── k8s/                 # Kubernetes manifests
+├── main.py                     # Main Discord bot application
+├── scraper_interface.py        # Scraper backend interface and factory
+├── scraper_backends/           # Scraper backend implementations
+│   ├── graphql_backend.py
+│   └── rss_backend.py
+├── test_scraper_interface.py   # Unit tests for the scraper interface
+├── test_integration.py         # Integration tests
+├── pyproject.toml              # Project dependencies
+├── Dockerfile                  # Container configuration
+├── k8s/                        # Kubernetes manifests
 │   ├── deployment.yaml
 │   ├── secret.yaml
 │   ├── kustomization.yaml
 │   └── README.md
-└── README.md           # This file
+└── README.md                   # This file
 ```
 
 ### Running Tests
 
 ```bash
-uv run python -m pytest test_scraper.py -v
+uv run python -m pytest test_scraper_interface.py -v
+uv run python -m pytest test_integration.py -v
 ```
 
 ## Troubleshooting
@@ -150,21 +171,12 @@ uv run python -m pytest test_scraper.py -v
 2. **Environment variables**: Ensure both `DISCORD_BOT_TOKEN` and `DISCORD_CHANNEL_ID` are set
 3. **Channel ID format**: The channel ID must be a valid number (Discord snowflake)
 
-### Logs
-
-The application provides detailed logging:
-
-- Connection status
-- Release checking activity
-- Error messages with context
-- Successful post confirmations
-
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
+4. Add tests
 5. Submit a pull request
 
 ## License

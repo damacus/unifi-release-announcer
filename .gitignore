@@ -5,3 +5,4 @@ __pycache__
 last_release_url.txt
 page_source.html
 unifi_release_announcer.egg-info
+.env

@@ -1,8 +1,10 @@
+import logging
 import os
 import sys
+
 import discord
-import logging
 from discord.ext import tasks
+
 from scraper_interface import Release, get_latest_release
 
 # --- Configuration ---
@@ -44,7 +46,7 @@ def format_release_message(release: Release) -> str:
 def get_last_posted_url() -> str:
     """Reads the URL of the last posted release from the state file."""
     try:
-        with open(LAST_RELEASE_FILE, "r") as f:
+        with open(LAST_RELEASE_FILE) as f:
             return f.read().strip()
     except FileNotFoundError:
         return ""
@@ -83,7 +85,10 @@ async def process_new_release(latest_release: Release) -> None:
             thread = await channel.create_thread(
                 name=f"UniFi Release: {latest_release.title}", content=message
             )
-            logging.info(f"Announcement posted to forum thread: {thread.name}")
+            logging.info("Posted to forum thread: %s", thread.thread.name)
+        elif isinstance(channel, discord.TextChannel):
+            await channel.send(message)
+            logging.info("Posted to text channel: %s", channel.name)
         else:
             logging.warning(
                 "Channel type %s is not explicitly supported.",
@@ -107,7 +112,8 @@ async def process_new_release(latest_release: Release) -> None:
 
     except discord.Forbidden:
         logging.error(
-            "Permission error: Cannot post in channel %s.", channel.name
+            "Permission error in channel %s.",
+            getattr(channel, "name", channel.id),
         )
     except discord.HTTPException as e:
         logging.error(f"Failed to send message due to an HTTP exception: {e}")

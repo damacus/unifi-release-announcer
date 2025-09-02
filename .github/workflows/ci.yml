@@ -24,7 +24,7 @@ jobs:
         run: uv python install
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --extra dev
 
       - name: Run tests
         run: |
@@ -55,18 +55,18 @@ jobs:
 
       - name: Extract metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v5.8.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
-            type=ref,event=pr,suffix=-beta
-            type=sha,prefix={{branch}}-
+            type=ref,event=pr
+            type=sha
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
         id: build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
@@ -107,13 +107,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Tag and push release image
+        env:
+          RELEASE_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          VERSION_TAG: ${{ needs.release-please.outputs.tag-name }}
         run: |
-          # Pull the latest image
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-
-          # Tag with version
-          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-                     ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.release-please.outputs.tag-name }}
-
-          # Push version tag
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.release-please.outputs.tag-name }}
+          docker pull "${RELEASE_IMAGE}:latest"
+          docker tag "${RELEASE_IMAGE}:latest" "${RELEASE_IMAGE}:${VERSION_TAG}"
+          docker push "${RELEASE_IMAGE}:${VERSION_TAG}"
