@@ -5,8 +5,8 @@ A Discord bot that monitors UniFi community releases and posts announcements to 
 ## Features
 
 - **Modular Scraper Architecture**: Swappable backends for different scraping needs
-- **JavaScript Support**: Handles modern React SPAs with Playwright
-- **Docker Ready**: Optimized container with Playwright dependencies
+- **GraphQL API**: Direct API access for reliable data fetching
+- **Docker Ready**: Optimized Alpine-based container (157MB)
 - **Environment Configuration**: Easy backend switching via environment variables
 - 🔍 **Automatic Monitoring**: Checks for new UniFi releases every 10 minutes
 - 📱 **Platform Detection**: Automatically tags releases with platform-specific emojis (iOS 📱, Android 🤖, Desktop 💻)
@@ -43,7 +43,7 @@ A Discord bot that monitors UniFi community releases and posts announcements to 
    ```env
    DISCORD_BOT_TOKEN=your_discord_bot_token
    DISCORD_CHANNEL_ID=your_discord_channel_id
-   SCRAPER_BACKEND=playwright  # or 'rss' if you prefer
+   SCRAPER_BACKEND=graphql  # or 'rss' if you prefer
    ```
 
 4. **Run the application**:
@@ -82,7 +82,7 @@ For the best development experience, use the provided dev container configuratio
 
 3. **Features included**:
    - Pre-configured Python environment with all dependencies
-   - Playwright browser support
+   - GraphQL API support
    - Python extensions (Black, Ruff, MyPy, Pytest)
    - Volume mounts for live code editing
    - Automatic dependency installation
@@ -142,7 +142,7 @@ Platform tags:
 ├── main.py                     # Main Discord bot application
 ├── scraper_interface.py        # Scraper backend interface and factory
 ├── scraper_backends/           # Scraper backend implementations
-│   ├── playwright_backend.py
+│   ├── graphql_backend.py
 │   └── rss_backend.py
 ├── test_scraper_interface.py   # Unit tests for the scraper interface
 ├── test_integration.py         # Integration tests

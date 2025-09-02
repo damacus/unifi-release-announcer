@@ -5,7 +5,7 @@ services:
     environment:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
-      - SCRAPER_BACKEND=${SCRAPER_BACKEND:-playwright}
+      - SCRAPER_BACKEND=${SCRAPER_BACKEND:-graphql}
     env_file: [.env]
     volumes:
       - ./last_release_url.txt:/app/last_release_url.txt
@@ -18,7 +18,7 @@ services:
     environment:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
-      - SCRAPER_BACKEND=${SCRAPER_BACKEND:-playwright}
+      - SCRAPER_BACKEND=${SCRAPER_BACKEND:-graphql}
     env_file: [.env]
     volumes:
       - .:/app
