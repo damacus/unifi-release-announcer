@@ -6,14 +6,11 @@ A Discord bot that monitors UniFi community releases and posts announcements to 
 
 - **Modular Scraper Architecture**: Swappable backends for different scraping needs
 - **JavaScript Support**: Handles modern React SPAs with Playwright
-- **Lightweight Options**: httpx + BeautifulSoup for static content
-- **Legacy Support**: Selenium backend for compatibility
 - **Docker Ready**: Optimized container with Playwright dependencies
 - **Environment Configuration**: Easy backend switching via environment variables
 - 🔍 **Automatic Monitoring**: Checks for new UniFi releases every 10 minutes
 - 📱 **Platform Detection**: Automatically tags releases with platform-specific emojis (iOS 📱, Android 🤖, Desktop 💻)
 - 🎯 **Smart Filtering**: Only posts new releases, avoiding duplicates
-- 🐳 **Docker Ready**: Containerized for easy deployment
 - ☸️ **Kubernetes Support**: Ready for deployment on k3s/Kubernetes clusters
 
 ## Prerequisites
@@ -36,7 +33,7 @@ A Discord bot that monitors UniFi community releases and posts announcements to 
 2. **Install dependencies using uv**:
 
    ```bash
-   uv sync
+   uv sync --extra dev
    ```
 
 3. **Set environment variables**:
