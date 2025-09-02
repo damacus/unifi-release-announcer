@@ -15,7 +15,7 @@ A Discord bot that monitors UniFi community releases and posts announcements to 
 
 ## Prerequisites
 
-- Python 3.11+
+- Python 3.13
 - Discord Bot Token
 - Discord Channel ID where announcements will be posted
 
@@ -120,23 +120,28 @@ Platform tags:
 ### Project Structure
 
 ```markdown
-├── main.py              # Main Discord bot application
-├── scraper.py           # Web scraping logic
-├── test_scraper.py      # Unit tests
-├── pyproject.toml       # Project dependencies
-├── Dockerfile           # Container configuration
-├── k8s/                 # Kubernetes manifests
+├── main.py                     # Main Discord bot application
+├── scraper_interface.py        # Scraper backend interface and factory
+├── scraper_backends/           # Scraper backend implementations
+│   ├── playwright_backend.py
+│   └── rss_backend.py
+├── test_scraper_interface.py   # Unit tests for the scraper interface
+├── test_integration.py         # Integration tests
+├── pyproject.toml              # Project dependencies
+├── Dockerfile                  # Container configuration
+├── k8s/                        # Kubernetes manifests
 │   ├── deployment.yaml
 │   ├── secret.yaml
 │   ├── kustomization.yaml
 │   └── README.md
-└── README.md           # This file
+└── README.md                   # This file
 ```
 
 ### Running Tests
 
 ```bash
-uv run python -m pytest test_scraper.py -v
+uv run python -m pytest test_scraper_interface.py -v
+uv run python -m pytest test_integration.py -v
 ```
 
 ## Troubleshooting
