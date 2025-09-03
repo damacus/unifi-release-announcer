@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.2](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.1.1...unifi-release-announcer-v0.1.2) (2025-09-03)
+
+
+### Bug Fixes
+
+* Multiarch images ([#15](https://github.com/damacus/unifi-release-announcer/issues/15)) ([b683f66](https://github.com/damacus/unifi-release-announcer/commit/b683f6618933e9850bdd8f6896705ea2dc34f03f))
+* Split workflows ([#14](https://github.com/damacus/unifi-release-announcer/issues/14)) ([336ecc3](https://github.com/damacus/unifi-release-announcer/commit/336ecc35e9264396f1c2f2b965e45493865511b2))
+
+
+### Miscellaneous
+
+* **deps:** update ghcr.io/astral-sh/uv:latest docker digest to 1eca97b ([#7](https://github.com/damacus/unifi-release-announcer/issues/7)) ([a31f844](https://github.com/damacus/unifi-release-announcer/commit/a31f84475b0d308911960539324653d788b6636f))
+
 ## [0.1.1](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.1.0...unifi-release-announcer-v0.1.1) (2025-09-03)
 
 
