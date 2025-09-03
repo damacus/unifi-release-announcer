@@ -84,6 +84,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: write
     outputs:
       release-created: ${{ steps.release.outputs.release_created }}
       tag-name: ${{ steps.release.outputs.tag_name }}
@@ -96,6 +97,8 @@ jobs:
       - name: Run release-please
         id: release
         uses: googleapis/release-please-action@v4.3.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   release-docker:
     if: needs.release-please.outputs.release-created == 'true'
