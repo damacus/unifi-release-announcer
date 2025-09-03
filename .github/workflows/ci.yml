@@ -102,6 +102,12 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
+      - name: Run Release Please
+        id: release
+        uses: googleapis/release-please-action@c2a5a2bd6a758a0937f1ddb1e8950609867ed15c # v4
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+
   release-docker:
     if: needs.release-please.outputs.release_created == 'true'
     needs: [build-and-push, release-please]
