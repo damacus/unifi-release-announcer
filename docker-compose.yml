@@ -6,9 +6,10 @@ services:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
       - SCRAPER_BACKEND=${SCRAPER_BACKEND:-graphql}
+      - TAGS=${TAGS:-unifi-protect,unifi-network}
     env_file: [.env]
     volumes:
-      - ./last_release_url.txt:/app/last_release_url.txt
+      - ./releases.json:/app/releases.json
 
   dev:
     build:
@@ -19,6 +20,7 @@ services:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
       - SCRAPER_BACKEND=${SCRAPER_BACKEND:-graphql}
+      - TAGS=${TAGS:-unifi-protect,unifi-network}
     env_file: [.env]
     volumes:
       - .:/app

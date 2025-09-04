@@ -1,7 +1,7 @@
 [project]
 name = "unifi-release-announcer"
 version = "0.1.2"
-description = "Discord bot that announces new UniFi Protect releases"
+description = "Discord bot that announces new UniFi releases"
 authors = [
     {name = "damacus"}
 ]
@@ -36,3 +36,12 @@ python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
+
+[project.scripts]
+test = "pytest"
+test-all = "pytest -v"

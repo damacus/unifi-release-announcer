@@ -7,16 +7,28 @@ More efficient and reliable than web scraping.
 
 import json
 import logging
+import os
 import requests
-from datetime import datetime
-from typing import Dict, Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from scraper_interface import Release
+from typing import Dict, List, Optional
 
 
 class GraphQLBackend:
     """GraphQL-based scraper for UniFi releases."""
+
+    # All valid tags from the UniFi Community API
+    ALLOWED_TAGS = [
+        "60GHz", "aircontrol", "airfiber", "airfiber-ltu", "airmax",
+        "airmax-aircube", "amplifi", "community-feedback", "edgemax",
+        "edgeswitch", "general", "gigabeam", "innerspace", "isp",
+        "isp-design-center", "routing", "security", "site-manager",
+        "solar", "switching", "ufiber", "uid", "uisp-app", "uisp-power",
+        "unifi", "unifi-access", "unifi-cloud-gateway", "unifi-connect",
+        "unifi-design-center", "unifi-drive", "unifi-gateway-cloudkey",
+        "unifi-led", "unifi-mobility", "unifi-network", "unifi-play",
+        "unifi-portal", "unifi-protect", "unifi-routing-switching",
+        "unifi-switching", "unifi-talk", "unifi-video", "unifi-voip",
+        "unifi-wireless", "unms", "wave", "wifiman"
+    ]
 
     def __init__(self) -> None:
         self.api_url = "https://community.svc.ui.com/"
@@ -30,6 +42,157 @@ class GraphQLBackend:
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'
         }
 
+    def get_allowed_tags(self) -> List[str]:
+        """Get the list of all allowed tags."""
+        return self.ALLOWED_TAGS.copy()
+
+    def get_configured_tags(self) -> List[str]:
+        """
+        Get configured tags from TAGS environment variable.
+
+        Returns:
+            List of configured tags, defaults to ["unifi-protect"] if not set
+
+        Raises:
+            ValueError: If any configured tag is not in the allowed list
+        """
+        tags_env = os.environ.get('TAGS', '').strip()
+
+        if not tags_env:
+            return ["unifi-protect"]
+
+        # Parse comma-separated tags and clean them up
+        tags = [tag.strip() for tag in tags_env.split(',') if tag.strip()]
+
+        # Validate all tags are in the allowed list
+        for tag in tags:
+            if tag not in self.ALLOWED_TAGS:
+                raise ValueError(
+                    f"Invalid tag '{tag}'. Allowed tags are: {', '.join(self.ALLOWED_TAGS)}"
+                )
+
+        return tags
+
+    async def get_latest_releases(self) -> List[Dict[str, str]]:
+        """
+        Get the latest releases for all configured tags in a single query.
+
+        Returns:
+            List of Release objects for each configured tag
+        """
+        try:
+            tags = self.get_configured_tags()
+            logging.info(f"Searching for releases with tags: {tags}")
+            if not tags:
+                logging.warning("No tags configured for searching!")
+                return []
+
+            query = """
+            query ReleaseFeedListQuery($tags: [String!], $betas: [String!], $alphas: [String!], $offset: Int, $limit: Int, $sortBy: ReleasesSortBy, $userIsFollowing: Boolean, $featuredOnly: Boolean, $searchTerm: String, $filterTags: [String!], $filterEATags: [String!], $statuses: [ReleaseStatus!]) {
+              releases(
+                tags: $tags
+                betas: $betas
+                alphas: $alphas
+                offset: $offset
+                limit: $limit
+                sortBy: $sortBy
+                userIsFollowing: $userIsFollowing
+                featuredOnly: $featuredOnly
+                searchTerm: $searchTerm
+                filterTags: $filterTags
+                filterEATags: $filterEATags
+                statuses: $statuses
+              ) {
+                items {
+                  id
+                  title
+                  version
+                  slug
+                  createdAt
+                  tags
+                }
+              }
+            }
+            """
+
+            variables = {
+                "tags": tags,
+                "betas": [],
+                "alphas": [],
+                "offset": 0,
+                "limit": 50,
+                "sortBy": None,
+                "userIsFollowing": False,
+                "featuredOnly": False,
+                "searchTerm": "",
+                "filterTags": [],
+                "filterEATags": [],
+                "statuses": ["PUBLISHED"]
+            }
+
+            payload = {
+                "query": query,
+                "variables": variables
+            }
+
+
+            response = requests.post(
+                self.api_url,
+                headers=self.headers,
+                json=payload,
+                timeout=30
+            )
+            response.raise_for_status()
+
+            data = response.json()
+            all_releases = data.get('data', {}).get('releases', {}).get('items', [])
+
+            if not all_releases:
+                logging.warning("No releases found in API response")
+                logging.info(f"Full API response: {data}")
+                if data and 'data' in data:
+                    logging.info(f"Data keys: {list(data['data'].keys())}")
+                    if 'releases' in data['data']:
+                        logging.info(f"Releases structure: {data['data']['releases']}")
+                return []
+
+            logging.info(f"Found {len(all_releases)} total releases from API")
+
+            # Group releases by tag and get the latest for each
+            releases_by_tag = {}
+            for release_data in all_releases:
+                release_tags = release_data.get('tags', [])
+
+                # Find which of our configured tags this release belongs to
+                for tag in tags:
+                    if tag in release_tags:
+                        if tag not in releases_by_tag:
+                            releases_by_tag[tag] = release_data
+                        else:
+                            # Keep the most recent (releases are sorted by createdAt DESC)
+                            current_date = releases_by_tag[tag]['createdAt']
+                            new_date = release_data['createdAt']
+                            if new_date > current_date:
+                                releases_by_tag[tag] = release_data
+
+            # Convert to Release objects
+            releases = []
+            for tag, release_data in releases_by_tag.items():
+                # Create release dict that matches Release dataclass structure
+                release_dict = {
+                    'title': f"{release_data['title']} {release_data['version']}",
+                    'url': f"https://community.ui.com/releases/"
+                           f"{release_data['slug']}/{release_data['id']}",
+                    'tag': tag
+                }
+                releases.append(release_dict)
+
+            return releases
+
+        except Exception as e:
+            logging.error(f"Error fetching latest releases: {e}")
+            return []
+
     async def get_latest_release(self) -> "Release | None":
         """
         Get the latest UniFi Protect release using GraphQL API.
@@ -38,7 +201,7 @@ class GraphQLBackend:
             Latest Release object or None if not found
         """
         try:
-            tags = ["unifi-protect"]
+            tags = self.get_configured_tags()
 
             query = """
             query ReleaseFeedListQuery($tags: [String!], $betas: [String!], $alphas: [String!], $offset: Int, $limit: Int, $sortBy: ReleasesSortBy, $userIsFollowing: Boolean, $featuredOnly: Boolean, $searchTerm: String, $filterTags: [String!], $filterEATags: [String!], $statuses: [ReleaseStatus!]) {

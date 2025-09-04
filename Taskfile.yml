@@ -1,0 +1,99 @@
+version: '3'
+
+vars:
+  PYTHON: python
+  UV: uv
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  install:
+    desc: Install production dependencies
+    cmds:
+      - "{{.UV}} sync --no-dev"
+
+  dev-install:
+    desc: Install development dependencies
+    cmds:
+      - "{{.UV}} sync --extra dev"
+
+  test:
+    desc: Run tests
+    cmds:
+      - "{{.PYTHON}} -m pytest -v"
+
+  test-cov:
+    desc: Run tests with coverage
+    cmds:
+      - "{{.PYTHON}} -m pytest -v --cov=. --cov-report=term-missing"
+
+  lint:
+    desc: Run linting
+    cmds:
+      - "{{.PYTHON}} -m ruff check ."
+
+  lint-fix:
+    desc: Run linting with auto-fix
+    cmds:
+      - "{{.PYTHON}} -m ruff check . --fix"
+
+  format:
+    desc: Format code
+    cmds:
+      - "{{.PYTHON}} -m ruff format ."
+
+  type-check:
+    desc: Run type checking
+    cmds:
+      - "{{.PYTHON}} -m mypy ."
+
+  check:
+    desc: Run all checks (tests, linting, type checking)
+    deps: [test, lint, type-check]
+    cmds:
+      - echo "🎉 All checks passed!"
+
+  clean:
+    desc: Clean up cache files
+    cmds:
+      - rm -rf __pycache__/
+      - rm -rf .pytest_cache/
+      - rm -rf .mypy_cache/
+      - rm -rf .ruff_cache/
+      - find . -name "*.pyc" -delete
+      - find . -name "*.pyo" -delete
+
+  run:
+    desc: Run the application locally
+    cmds:
+      - "{{.PYTHON}} main.py"
+
+  build:
+    desc: Build Docker image
+    cmds:
+      - docker compose build announcer
+
+  docker-run:
+    desc: Run in Docker
+    cmds:
+      - docker compose run announcer
+
+  dev:
+    desc: Run development container
+    cmds:
+      - docker compose run dev
+
+  ci:
+    desc: Run CI pipeline locally
+    deps: [test-cov, lint, type-check]
+    cmds:
+      - echo "✅ CI pipeline completed successfully!"
+
+  pre-commit:
+    desc: Run pre-commit checks
+    deps: [format, lint-fix, test]
+    cmds:
+      - echo "✅ Pre-commit checks completed!"
