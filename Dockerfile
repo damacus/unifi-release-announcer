@@ -37,5 +37,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY scraper_backends/ /app/scraper_backends/
 COPY main.py /app/main.py
 COPY scraper_interface.py /app/scraper_interface.py
+COPY state_manager.py /app/state_manager.py
 
 CMD ["python", "main.py"]

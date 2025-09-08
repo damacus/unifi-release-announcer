@@ -16,18 +16,19 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@557e51de59eb14aaaba2ed9621916900a91d50c6 # v6
 
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+
       - name: Set up Python
         run: uv python install
 
       - name: Install dependencies
-        run: uv sync --extra dev
+        run: task dev-install
 
       - name: Run tests
-        run: |
-          uv run python -m pytest \
-            test_scraper_interface.py \
-            test_integration.py \
-            -v
+        run: task test
 
   build-and-push:
     needs: test
