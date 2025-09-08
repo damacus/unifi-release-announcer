@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.3](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.1.2...unifi-release-announcer-v0.1.3) (2025-09-08)
+
+
+### Miscellaneous
+
+* **deps:** pin dependencies ([#9](https://github.com/damacus/unifi-release-announcer/issues/9)) ([b754221](https://github.com/damacus/unifi-release-announcer/commit/b754221c14d95bb200dd09a9b02cf0ab20c889f4))
+* **deps:** update ghcr.io/astral-sh/uv:latest docker digest to a572706 ([#16](https://github.com/damacus/unifi-release-announcer/issues/16)) ([44be08d](https://github.com/damacus/unifi-release-announcer/commit/44be08db28e5919621272318fcbcfd3521d7b23a))
+
 ## [0.1.2](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.1.1...unifi-release-announcer-v0.1.2) (2025-09-03)
 
 
