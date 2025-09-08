@@ -6,9 +6,10 @@ services:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
       - SCRAPER_BACKEND=${SCRAPER_BACKEND:-graphql}
+      - TAGS=${TAGS:-unifi-protect,unifi-network}
     env_file: [.env]
     volumes:
-      - ./last_release_url.txt:/app/last_release_url.txt
+      - ./cache:/cache
 
   dev:
     build:
@@ -19,16 +20,11 @@ services:
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
       - SCRAPER_BACKEND=${SCRAPER_BACKEND:-graphql}
+      - TAGS=${TAGS:-unifi-protect,unifi-network}
     env_file: [.env]
     volumes:
       - .:/app
       - dev_venv:/app/.venv
-      - dev_ruff_cache:/app/.ruff_cache
-      - dev_mypy_cache:/app/.mypy_cache
-      - dev_pytest_cache:/app/.pytest_cache
 
 volumes:
   dev_venv:
-  dev_ruff_cache:
-  dev_mypy_cache:
-  dev_pytest_cache:
