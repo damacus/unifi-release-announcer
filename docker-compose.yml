@@ -9,7 +9,7 @@ services:
       - TAGS=${TAGS:-unifi-protect,unifi-network}
     env_file: [.env]
     volumes:
-      - ./releases.json:/app/releases.json
+      - ./cache:/cache
 
   dev:
     build:
@@ -25,12 +25,6 @@ services:
     volumes:
       - .:/app
       - dev_venv:/app/.venv
-      - dev_ruff_cache:/app/.ruff_cache
-      - dev_mypy_cache:/app/.mypy_cache
-      - dev_pytest_cache:/app/.pytest_cache
 
 volumes:
   dev_venv:
-  dev_ruff_cache:
-  dev_mypy_cache:
-  dev_pytest_cache:

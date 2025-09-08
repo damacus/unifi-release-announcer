@@ -17,7 +17,7 @@ logging.basicConfig(
 
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 DISCORD_CHANNEL_ID = os.getenv("DISCORD_CHANNEL_ID")
-STATE_FILE = "release_state.json"
+STATE_FILE = "/cache/release_state.json"
 
 # --- Bot Setup ---
 intents = discord.Intents.default()
@@ -38,10 +38,7 @@ def format_release_message(release: Release) -> str:
     elif "desktop" in title.lower() or "application" in title.lower():
         platform_emoji = "💻"
 
-    return (
-        f"🎉 **New UniFi Release Posted**\n\n"
-        f"🔗 [{title}]({url}) {platform_emoji}"
-    )
+    return f"🎉 **New UniFi Release Posted**\n\n🔗 [{title}]({url}) {platform_emoji}"
 
 
 # State management is now handled by StateManager class
@@ -71,9 +68,7 @@ async def process_new_release(latest_release: Release, state_manager: StateManag
 
     try:
         if isinstance(channel, discord.ForumChannel):
-            thread = await channel.create_thread(
-                name=f"UniFi Release: {latest_release.title}", content=message
-            )
+            thread = await channel.create_thread(name=f"UniFi Release: {latest_release.title}", content=message)
             logging.info("Posted to forum thread: %s", thread.thread.name)
         elif isinstance(channel, discord.TextChannel):
             await channel.send(message)
@@ -126,10 +121,10 @@ async def on_ready() -> None:
 async def check_for_updates() -> None:
     """Periodically checks for new releases and posts them."""
     logging.info("Checking for new UniFi releases...")
-    
+
     state_manager = StateManager(STATE_FILE)
     latest_releases = await get_latest_releases()
-    
+
     if not latest_releases:
         logging.info("No new releases found or failed to fetch.")
         return
@@ -139,7 +134,7 @@ async def check_for_updates() -> None:
         if not state_manager.has_seen_url(release.tag, release.url):
             await process_new_release(release, state_manager)
             new_releases_found = True
-    
+
     if not new_releases_found:
         logging.info("No new releases found.")
 
@@ -154,17 +149,14 @@ async def before_check() -> None:
 if __name__ == "__main__":
     if not DISCORD_BOT_TOKEN or not DISCORD_CHANNEL_ID:
         logging.critical(
-            "Missing required environment variables: DISCORD_BOT_TOKEN and "
-            "DISCORD_CHANNEL_ID must be set."
+            "Missing required environment variables: DISCORD_BOT_TOKEN and DISCORD_CHANNEL_ID must be set."
         )
         sys.exit(1)
 
     try:
         int(DISCORD_CHANNEL_ID)
     except ValueError:
-        logging.critical(
-            "Config error: DISCORD_CHANNEL_ID must be a valid integer."
-        )
+        logging.critical("Config error: DISCORD_CHANNEL_ID must be a valid integer.")
         sys.exit(1)
 
     try:

@@ -1,17 +1,13 @@
-#!/usr/bin/env python3
 """
 Integration test to verify the modular scraper works with main.py
 """
 
 import asyncio
 import logging
-
 from scraper_interface import get_latest_release
 
 # Setup logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 def test_integration() -> None:

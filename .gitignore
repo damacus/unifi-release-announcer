@@ -2,7 +2,7 @@ __pycache__
 .mypy_cache
 .pytest_cache
 .venv
-releases.json
-page_source.html
-unifi_release_announcer.egg-info
+cache
+*.egg-info
 .env
+.coverage

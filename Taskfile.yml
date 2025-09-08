@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  PYTHON: python
+  PYTHON: uv run python
   UV: uv
 
 tasks:

@@ -116,6 +116,7 @@ See the [k8s/README.md](k8s/README.md) for detailed Kubernetes deployment instru
 The following tags are available for filtering UniFi releases:
 
 **UniFi Products:**
+
 - `unifi` - General UniFi releases
 - `unifi-access` - UniFi Access (door access control)
 - `unifi-cloud-gateway` - UniFi Cloud Gateway
@@ -137,6 +138,7 @@ The following tags are available for filtering UniFi releases:
 - `unifi-wireless` - UniFi Wireless (access points)
 
 **Other Ubiquiti Products:**
+
 - `60GHz` - 60GHz wireless products
 - `aircontrol` - AirControl software
 - `airfiber` - AirFiber products
@@ -159,6 +161,7 @@ The following tags are available for filtering UniFi releases:
 - `wifiman` - WiFiman application
 
 **General Categories:**
+
 - `community-feedback` - Community feedback
 - `general` - General announcements
 - `routing` - Routing products
@@ -168,6 +171,7 @@ The following tags are available for filtering UniFi releases:
 - `switching` - Switching products
 
 **Examples:**
+
 ```bash
 # Monitor only UniFi Protect releases (default)
 TAGS="unifi-protect"
@@ -185,9 +189,9 @@ TAGS="edgemax,amplifi"
 ## How It Works
 
 1. **Scraping**: The bot scrapes the Ubiquiti Community forums for the latest UniFi releases
-2. **Comparison**: It compares the latest release URL with the previously posted one (stored in `releases.json`)
+2. **Comparison**: It compares the latest release URL with the previously posted one (stored in `/cache/release_state.json`)
 3. **Posting**: If a new release is found, it formats a message with platform tags and posts to Discord
-4. **State Management**: Updates the stored URL to prevent duplicate posts (stored in `releases.json`)
+4. **State Management**: Updates the stored URL to prevent duplicate posts (stored in `/cache/release_state.json`)
 
 ## Message Format
 
@@ -229,6 +233,15 @@ Platform tags:
 ```
 
 ### Running Tests
+
+Run all tests using
+
+```shell
+task dev-install
+task test
+```
+
+Or run the tests directly using
 
 ```bash
 uv run python -m pytest test_scraper_interface.py -v

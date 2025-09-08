@@ -11,6 +11,7 @@ class Release:
     """
     Represents a UniFi release with title and URL.
     """
+
     title: str
     url: str
     tag: str = ""  # Optional tag field for multi-tag support
@@ -42,11 +43,7 @@ async def get_latest_releases() -> list[Release]:
         # Convert dicts to Release objects
         releases = []
         for release_dict in release_dicts:
-            release = Release(
-                title=release_dict['title'],
-                url=release_dict['url'],
-                tag=release_dict['tag']
-            )
+            release = Release(title=release_dict["title"], url=release_dict["url"], tag=release_dict["tag"])
             releases.append(release)
         return releases
     except Exception as e:
