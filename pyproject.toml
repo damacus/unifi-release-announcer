@@ -1,6 +1,6 @@
 [project]
 name = "unifi-release-announcer"
-version = "0.1.7"
+version = "0.1.8"
 description = "Discord bot that announces new UniFi releases"
 authors = [
     {name = "damacus"}
