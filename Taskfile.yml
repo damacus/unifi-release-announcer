@@ -97,3 +97,18 @@ tasks:
     deps: [format, lint-fix, test]
     cmds:
       - echo "✅ Pre-commit checks completed!"
+
+  docs-serve:
+    desc: Serve documentation locally
+    cmds:
+      - "{{.UV}} run mkdocs serve"
+
+  docs-build:
+    desc: Build documentation site
+    cmds:
+      - "{{.UV}} run mkdocs build"
+
+  docs-deploy:
+    desc: Deploy documentation to GitHub Pages
+    cmds:
+      - "{{.UV}} run mkdocs gh-deploy"

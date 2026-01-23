@@ -1,8 +1,11 @@
 """Tests for the GraphQL backend module."""
 
+import asyncio
 import os
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import aiohttp
 from scraper_backends.graphql_backend import GraphQLBackend
 
 
@@ -25,13 +28,14 @@ class TestGraphQLBackendBase(unittest.TestCase):
         """Create a mock response with given releases data."""
         mock_response = MagicMock()
         mock_response.raise_for_status.return_value = None
-        mock_response.json.return_value = {
+        # json() is awaited in the implementation, so it must return an awaitable or be an AsyncMock
+        mock_response.json = AsyncMock(return_value={
             "data": {
                 "releases": {
                     "items": releases_data
                 }
             }
-        }
+        })
         return mock_response
 
 
@@ -114,12 +118,12 @@ class TestGraphQLBackendTags(TestGraphQLBackendBase):
         tags = backend.get_configured_tags()
         self.assertEqual(tags, valid_tags)
 
-    @patch("scraper_backends.graphql_backend.requests.post")
-    def test_get_latest_releases_for_multiple_tags(self, mock_post: MagicMock) -> None:
+    @patch("aiohttp.ClientSession")
+    def test_get_latest_releases_for_multiple_tags(self, mock_session_cls: MagicMock) -> None:
         """Test that get_latest_releases queries all tags in single request."""
-        # Mock successful API response with releases for multiple tags
-        mock_response = MagicMock()
-        mock_response.raise_for_status.return_value = None
+        # Setup mock session and response
+        mock_response = AsyncMock()
+        mock_response.raise_for_status = MagicMock()
         mock_response.json.return_value = {
             "data": {
                 "releases": {
@@ -144,41 +148,50 @@ class TestGraphQLBackendTags(TestGraphQLBackendBase):
                 }
             }
         }
-        mock_post.return_value = mock_response
+        
+        # Mock context managers: async with ClientSession() -> session
+        # async with session.post() -> response
+        mock_session = mock_session_cls.return_value
+        mock_session.__aenter__.return_value = mock_session
+        
+        mock_post_ctx = MagicMock()
+        mock_session.post.return_value = mock_post_ctx
+        mock_post_ctx.__aenter__.return_value = mock_response
 
         # Set multiple tags
         os.environ["TAGS"] = "unifi-network,unifi-protect"
         backend = GraphQLBackend()
 
         # Call the method
-        import asyncio
-
         results = asyncio.run(backend.get_latest_releases())
 
         # Verify we got results for both tags
         self.assertEqual(len(results), 2)
 
         # Verify API was called only once (single query for all tags)
-        self.assertEqual(mock_post.call_count, 1)
+        self.assertEqual(mock_session.post.call_count, 1)
 
         # Verify the call used all configured tags
-        call_args = mock_post.call_args
+        call_args = mock_session.post.call_args
         payload = call_args[1]["json"]
         self.assertEqual(set(payload["variables"]["tags"]), {"unifi-network", "unifi-protect"})
 
-    @patch("scraper_backends.graphql_backend.requests.post")
-    def test_get_latest_releases_handles_empty_results(self, mock_post: MagicMock) -> None:
+    @patch("aiohttp.ClientSession")
+    def test_get_latest_releases_handles_empty_results(self, mock_session_cls: MagicMock) -> None:
         """Test that get_latest_releases handles tags with no releases."""
-        # Mock response with no items
-        mock_response = MagicMock()
-        mock_response.raise_for_status.return_value = None
+        mock_response = AsyncMock()
+        mock_response.raise_for_status = MagicMock()
         mock_response.json.return_value = {"data": {"releases": {"items": []}}}
-        mock_post.return_value = mock_response
+        
+        mock_session = mock_session_cls.return_value
+        mock_session.__aenter__.return_value = mock_session
+        
+        mock_post_ctx = MagicMock()
+        mock_session.post.return_value = mock_post_ctx
+        mock_post_ctx.__aenter__.return_value = mock_response
 
         os.environ["TAGS"] = "unifi-network"
         backend = GraphQLBackend()
-
-        import asyncio
 
         results = asyncio.run(backend.get_latest_releases())
 
@@ -200,10 +213,29 @@ class TestGraphQLBackendTags(TestGraphQLBackendBase):
 
 class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
     """Test suite for GraphQL backend filtering functionality."""
+    
+    def _setup_mock(self, mock_session_cls: MagicMock, releases_data: list) -> None:
+        """Helper to setup aiohttp mock chain."""
+        mock_response = AsyncMock()
+        mock_response.raise_for_status = MagicMock()
+        mock_response.json.return_value = {
+            "data": {
+                "releases": {
+                    "items": releases_data
+                }
+            }
+        }
+        
+        mock_session = mock_session_cls.return_value
+        mock_session.__aenter__.return_value = mock_session
+        
+        mock_post_ctx = MagicMock()
+        mock_session.post.return_value = mock_post_ctx
+        mock_post_ctx.__aenter__.return_value = mock_response
 
-    @patch("scraper_backends.graphql_backend.requests.post")
+    @patch("aiohttp.ClientSession")
     def test_filters_android_releases_from_unifi_network(
-        self, mock_post: MagicMock
+        self, mock_session_cls: MagicMock
     ) -> None:
         """Test that Android releases are filtered out from unifi-network tag."""
         releases_data = [
@@ -224,12 +256,11 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
                 "createdAt": "2023-01-02T00:00:00Z",
             },
         ]
-        mock_post.return_value = self.create_mock_response(releases_data)
+        self._setup_mock(mock_session_cls, releases_data)
 
         os.environ["TAGS"] = "unifi-network"
         backend = GraphQLBackend()
 
-        import asyncio
         results = asyncio.run(backend.get_latest_releases())
 
         # Should only return the base network release, not Android
@@ -237,232 +268,188 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
         self.assertIn("UniFi Network 2.0.0", results[0]["title"])
         self.assertNotIn("Android", results[0]["title"])
 
-    @patch("scraper_backends.graphql_backend.requests.post")
+    @patch("aiohttp.ClientSession")
     def test_filters_ios_releases_from_unifi_network(
-        self, mock_post: MagicMock
+        self, mock_session_cls: MagicMock
     ) -> None:
         """Test that iOS releases are filtered out from unifi-network tag."""
-        mock_response = MagicMock()
-        mock_response.raise_for_status.return_value = None
-        mock_response.json.return_value = {
-            "data": {
-                "releases": {
-                    "items": [
-                        {
-                            "id": "123",
-                            "title": "UniFi Network iOS",
-                            "version": "1.0.0",
-                            "slug": "network-ios",
-                            "tags": ["unifi-network"],
-                            "createdAt": "2023-01-01T00:00:00Z",
-                        },
-                        {
-                            "id": "456",
-                            "title": "UniFi Network iPhone",
-                            "version": "1.1.0",
-                            "slug": "network-iphone",
-                            "tags": ["unifi-network"],
-                            "createdAt": "2023-01-02T00:00:00Z",
-                        },
-                        {
-                            "id": "789",
-                            "title": "UniFi Network iPad",
-                            "version": "1.2.0",
-                            "slug": "network-ipad",
-                            "tags": ["unifi-network"],
-                            "createdAt": "2023-01-03T00:00:00Z",
-                        },
-                        {
-                            "id": "101",
-                            "title": "UniFi Network",
-                            "version": "2.0.0",
-                            "slug": "network-base",
-                            "tags": ["unifi-network"],
-                            "createdAt": "2023-01-04T00:00:00Z",
-                        },
-                    ]
-                }
-            }
-        }
-        mock_post.return_value = mock_response
+        releases_data = [
+            {
+                "id": "123",
+                "title": "UniFi Network iOS",
+                "version": "1.0.0",
+                "slug": "network-ios",
+                "tags": ["unifi-network"],
+                "createdAt": "2023-01-01T00:00:00Z",
+            },
+            {
+                "id": "456",
+                "title": "UniFi Network iPhone",
+                "version": "1.1.0",
+                "slug": "network-iphone",
+                "tags": ["unifi-network"],
+                "createdAt": "2023-01-02T00:00:00Z",
+            },
+            {
+                "id": "789",
+                "title": "UniFi Network iPad",
+                "version": "1.2.0",
+                "slug": "network-ipad",
+                "tags": ["unifi-network"],
+                "createdAt": "2023-01-03T00:00:00Z",
+            },
+            {
+                "id": "101",
+                "title": "UniFi Network",
+                "version": "2.0.0",
+                "slug": "network-base",
+                "tags": ["unifi-network"],
+                "createdAt": "2023-01-04T00:00:00Z",
+            },
+        ]
+        self._setup_mock(mock_session_cls, releases_data)
 
         os.environ["TAGS"] = "unifi-network"
         backend = GraphQLBackend()
 
-        import asyncio
         results = asyncio.run(backend.get_latest_releases())
 
         # Should only return the base network release
         self.assertEqual(len(results), 1)
         self.assertIn("UniFi Network 2.0.0", results[0]["title"])
 
-    @patch("scraper_backends.graphql_backend.requests.post")
-    def test_does_not_filter_mobile_releases_from_other_tags(
-        self, mock_post: MagicMock
+    @patch("aiohttp.ClientSession")
+    def test_filters_mobile_releases_from_all_tags(
+        self, mock_session_cls: MagicMock
     ) -> None:
-        """Test that mobile releases are not filtered from non-unifi-network tags."""
-        mock_response = MagicMock()
-        mock_response.raise_for_status.return_value = None
-        mock_response.json.return_value = {
-            "data": {
-                "releases": {
-                    "items": [
-                        {
-                            "id": "123",
-                            "title": "UniFi Protect Android",
-                            "version": "1.0.0",
-                            "slug": "protect-android",
-                            "tags": ["unifi-protect"],
-                            "createdAt": "2023-01-01T00:00:00Z",
-                        },
-                    ]
-                }
-            }
-        }
-        mock_post.return_value = mock_response
+        """Test that mobile releases are filtered from all tags, not just unifi-network."""
+        releases_data = [
+            {
+                "id": "123",
+                "title": "UniFi Protect Android",
+                "version": "1.0.0",
+                "slug": "protect-android",
+                "tags": ["unifi-protect"],
+                "createdAt": "2023-01-01T00:00:00Z",
+            },
+            {
+                "id": "456",
+                "title": "UniFi Protect",
+                "version": "2.0.0",
+                "slug": "protect-base",
+                "tags": ["unifi-protect"],
+                "createdAt": "2023-01-02T00:00:00Z",
+            },
+        ]
+        self._setup_mock(mock_session_cls, releases_data)
 
         os.environ["TAGS"] = "unifi-protect"
         backend = GraphQLBackend()
 
-        import asyncio
         results = asyncio.run(backend.get_latest_releases())
 
-        # Should return the Android release for protect tag
+        # Should return only the base protect release, not Android
         self.assertEqual(len(results), 1)
-        self.assertIn("UniFi Protect Android", results[0]["title"])
+        self.assertIn("UniFi Protect 2.0.0", results[0]["title"])
+        self.assertNotIn("Android", results[0]["title"])
 
-    @patch("scraper_backends.graphql_backend.requests.post")
+
+    @patch("aiohttp.ClientSession")
     def test_adds_ga_status_to_stable_releases(
-        self, mock_post: MagicMock
+        self, mock_session_cls: MagicMock
     ) -> None:
         """Test that GA status is added to stable releases."""
-        mock_response = MagicMock()
-        mock_response.raise_for_status.return_value = None
-        mock_response.json.return_value = {
-            "data": {
-                "releases": {
-                    "items": [
-                        {
-                            "id": "123",
-                            "title": "UniFi Network",
-                            "version": "8.0.28",
-                            "slug": "network-stable",
-                            "tags": ["unifi-network"],
-                            "createdAt": "2023-01-01T00:00:00Z",
-                        },
-                    ]
-                }
-            }
-        }
-        mock_post.return_value = mock_response
+        releases_data = [
+            {
+                "id": "123",
+                "title": "UniFi Network",
+                "version": "8.0.28",
+                "slug": "network-stable",
+                "tags": ["unifi-network"],
+                "createdAt": "2023-01-01T00:00:00Z",
+            },
+        ]
+        self._setup_mock(mock_session_cls, releases_data)
 
         os.environ["TAGS"] = "unifi-network"
         backend = GraphQLBackend()
 
-        import asyncio
         results = asyncio.run(backend.get_latest_releases())
 
         self.assertEqual(len(results), 1)
         self.assertIn("(GA)", results[0]["title"])
         self.assertEqual(results[0]["title"], "UniFi Network 8.0.28 (GA)")
 
-    @patch("scraper_backends.graphql_backend.requests.post")
+    @patch("aiohttp.ClientSession")
     def test_adds_beta_status_to_beta_releases(
-        self, mock_post: MagicMock
+        self, mock_session_cls: MagicMock
     ) -> None:
         """Test that Beta status is added to beta releases."""
-        mock_response = MagicMock()
-        mock_response.raise_for_status.return_value = None
-        mock_response.json.return_value = {
-            "data": {
-                "releases": {
-                    "items": [
-                        {
-                            "id": "123",
-                            "title": "UniFi Network",
-                            "version": "8.1.0-beta.1",
-                            "slug": "network-beta",
-                            "tags": ["unifi-network"],
-                            "createdAt": "2023-01-01T00:00:00Z",
-                        },
-                    ]
-                }
-            }
-        }
-        mock_post.return_value = mock_response
+        releases_data = [
+            {
+                "id": "123",
+                "title": "UniFi Network",
+                "version": "8.1.0-beta.1",
+                "slug": "network-beta",
+                "tags": ["unifi-network"],
+                "createdAt": "2023-01-01T00:00:00Z",
+            },
+        ]
+        self._setup_mock(mock_session_cls, releases_data)
 
         os.environ["TAGS"] = "unifi-network"
         backend = GraphQLBackend()
 
-        import asyncio
         results = asyncio.run(backend.get_latest_releases())
 
         self.assertEqual(len(results), 1)
         self.assertIn("(Beta)", results[0]["title"])
         self.assertEqual(results[0]["title"], "UniFi Network 8.1.0-beta.1 (Beta)")
 
-    @patch("scraper_backends.graphql_backend.requests.post")
+    @patch("aiohttp.ClientSession")
     def test_adds_beta_status_to_rc_releases(
-        self, mock_post: MagicMock
+        self, mock_session_cls: MagicMock
     ) -> None:
         """Test that Beta status is added to release candidate versions."""
-        mock_response = MagicMock()
-        mock_response.raise_for_status.return_value = None
-        mock_response.json.return_value = {
-            "data": {
-                "releases": {
-                    "items": [
-                        {
-                            "id": "123",
-                            "title": "UniFi Network",
-                            "version": "8.1.0-rc.1",
-                            "slug": "network-rc",
-                            "tags": ["unifi-network"],
-                            "createdAt": "2023-01-01T00:00:00Z",
-                        },
-                    ]
-                }
-            }
-        }
-        mock_post.return_value = mock_response
+        releases_data = [
+            {
+                "id": "123",
+                "title": "UniFi Network",
+                "version": "8.1.0-rc.1",
+                "slug": "network-rc",
+                "tags": ["unifi-network"],
+                "createdAt": "2023-01-01T00:00:00Z",
+            },
+        ]
+        self._setup_mock(mock_session_cls, releases_data)
 
         os.environ["TAGS"] = "unifi-network"
         backend = GraphQLBackend()
 
-        import asyncio
         results = asyncio.run(backend.get_latest_releases())
 
         self.assertEqual(len(results), 1)
         self.assertIn("(Beta)", results[0]["title"])
         self.assertEqual(results[0]["title"], "UniFi Network 8.1.0-rc.1 (Beta)")
 
-    @patch("scraper_backends.graphql_backend.requests.post")
-    def test_detects_beta_in_title(self, mock_post: MagicMock) -> None:
+    @patch("aiohttp.ClientSession")
+    def test_detects_beta_in_title(self, mock_session_cls: MagicMock) -> None:
         """Test that Beta status is detected when 'beta' appears in title."""
-        mock_response = MagicMock()
-        mock_response.raise_for_status.return_value = None
-        mock_response.json.return_value = {
-            "data": {
-                "releases": {
-                    "items": [
-                        {
-                            "id": "123",
-                            "title": "UniFi Network Beta",
-                            "version": "8.1.0",
-                            "slug": "network-beta-title",
-                            "tags": ["unifi-network"],
-                            "createdAt": "2023-01-01T00:00:00Z",
-                        },
-                    ]
-                }
-            }
-        }
-        mock_post.return_value = mock_response
+        releases_data = [
+            {
+                "id": "123",
+                "title": "UniFi Network Beta",
+                "version": "8.1.0",
+                "slug": "network-beta-title",
+                "tags": ["unifi-network"],
+                "createdAt": "2023-01-01T00:00:00Z",
+            },
+        ]
+        self._setup_mock(mock_session_cls, releases_data)
 
         os.environ["TAGS"] = "unifi-network"
         backend = GraphQLBackend()
 
-        import asyncio
         results = asyncio.run(backend.get_latest_releases())
 
         self.assertEqual(len(results), 1)

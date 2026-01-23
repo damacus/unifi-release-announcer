@@ -6,3 +6,4 @@ cache
 *.egg-info
 .env
 .coverage
+site/

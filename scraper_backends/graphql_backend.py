@@ -5,16 +5,15 @@ Uses the UniFi Community GraphQL API to fetch release data directly.
 More efficient and reliable than web scraping.
 """
 
-import json
 import logging
 import os
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-import requests
+import aiohttp
 
 if TYPE_CHECKING:
-    pass
+    from scraper_interface import Release
 
 class GraphQLBackend:
     """GraphQL-based scraper for UniFi releases."""
@@ -186,19 +185,16 @@ class GraphQLBackend:
 
             payload = {"query": query, "variables": variables}
 
-            response = requests.post(self.api_url, headers=self.headers, json=payload, timeout=30)
-            response.raise_for_status()
+            async with aiohttp.ClientSession() as session:
+                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=30) as response:
+                    response.raise_for_status()
+                    data = await response.json()
 
-            data = response.json()
             all_releases = data.get("data", {}).get("releases", {}).get("items", [])
 
             if not all_releases:
                 logging.warning("No releases found in API response")
-                logging.info(f"Full API response: {data}")
-                if data and "data" in data:
-                    logging.info(f"Data keys: {list(data['data'].keys())}")
-                    if "releases" in data["data"]:
-                        logging.info(f"Releases structure: {data['data']['releases']}")
+                logging.debug(f"Full API response: {data}")
                 return []
 
             logging.info(f"Found {len(all_releases)} total releases from API")
@@ -209,16 +205,30 @@ class GraphQLBackend:
                 release_tags = release_data.get("tags", [])
                 release_title = release_data.get("title", "").lower()
 
+                # Define unwanted release patterns to filter out
+                unwanted_patterns = [
+                    "android",
+                    "ios", 
+                    "iphone",
+                    "ipad",
+                    "sfp wizard",
+                    "ups",
+                ]
+                
+                # Check if this release should be filtered out
+                should_skip = False
+                for pattern in unwanted_patterns:
+                    if pattern in release_title:
+                        should_skip = True
+                        logging.debug(f"Filtering out release '{release_data.get('title')}' due to pattern '{pattern}'")
+                        break
+                
+                if should_skip:
+                    continue
+
                 # Find which of our configured tags this release belongs to
                 for tag in tags:
                     if tag in release_tags:
-                        # Filter out Android and iOS releases from unifi-network
-                        if tag == "unifi-network":
-                            if ("android" in release_title or
-                                "ios" in release_title or
-                                "iphone" in release_title or
-                                "ipad" in release_title):
-                                continue
                         if tag not in releases_by_tag:
                             releases_by_tag[tag] = release_data
                         else:
@@ -352,10 +362,10 @@ class GraphQLBackend:
 
             logging.info("Fetching latest UniFi Protect release")
 
-            response = requests.post(self.api_url, headers=self.headers, json=payload, timeout=30)
-            response.raise_for_status()
-
-            data = response.json()
+            async with aiohttp.ClientSession() as session:
+                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=30) as response:
+                    response.raise_for_status()
+                    data = await response.json()
 
             if "errors" in data:
                 logging.error(f"GraphQL errors: {data['errors']}")
@@ -376,11 +386,8 @@ class GraphQLBackend:
                 url=f"https://community.ui.com/releases/{latest['slug']}/{latest['id']}",
             )
 
-        except requests.RequestException as e:
+        except aiohttp.ClientError as e:
             logging.error(f"Network error fetching releases: {e}")
-            return None
-        except json.JSONDecodeError as e:
-            logging.error(f"JSON decode error: {e}")
             return None
         except Exception as e:
             logging.error(f"Unexpected error in GraphQL backend: {e}")
@@ -403,7 +410,7 @@ class GraphQLBackend:
             "last_activity": release.get("lastActivityAt"),
         }
 
-    def get_release_details(self, release_id: str) -> dict | None:
+    async def get_release_details(self, release_id: str) -> dict | None:
         """
         Get detailed information for a specific release.
 
@@ -447,10 +454,10 @@ class GraphQLBackend:
 
             payload = {"query": query, "variables": {"id": release_id}, "operationName": "ReleaseDetailQuery"}
 
-            response = requests.post(self.api_url, headers=self.headers, json=payload, timeout=30)
-            response.raise_for_status()
-
-            data = response.json()
+            async with aiohttp.ClientSession() as session:
+                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=30) as response:
+                    response.raise_for_status()
+                    data = await response.json()
 
             if "errors" in data:
                 logging.error(f"GraphQL errors: {data['errors']}")

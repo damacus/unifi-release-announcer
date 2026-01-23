@@ -13,6 +13,28 @@ A Discord bot that monitors UniFi community releases and posts announcements to 
 - 🎯 **Smart Filtering**: Only posts new releases, avoiding duplicates
 - ☸️ **Kubernetes Support**: Ready for deployment on k3s/Kubernetes clusters
 
+## Documentation
+
+Comprehensive documentation is available at the [documentation site](https://damacus.github.io/unifi-release-announcer/).
+
+Quick links:
+- [Installation Guide](https://damacus.github.io/unifi-release-announcer/installation/)
+- [Configuration](https://damacus.github.io/unifi-release-announcer/configuration/)
+- [Deployment Options](https://damacus.github.io/unifi-release-announcer/deployment/)
+- [Advanced Usage](https://damacus.github.io/unifi-release-announcer/advanced/)
+- [API Reference](https://damacus.github.io/unifi-release-announcer/api/)
+- [Troubleshooting](https://damacus.github.io/unifi-release-announcer/troubleshooting/)
+
+### Building Documentation Locally
+
+```bash
+# Serve documentation locally
+task docs-serve
+
+# Build documentation
+task docs-build
+```
+
 ## Prerequisites
 
 - Python 3.13
