@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.1.9...unifi-release-announcer-v0.2.0) (2026-01-23)
+
+
+### Features
+
+* aiohttp & docs  ([#86](https://github.com/damacus/unifi-release-announcer/issues/86)) ([afe3315](https://github.com/damacus/unifi-release-announcer/commit/afe33159d9b53d88c8d1083657c4169bc9a852c0))
+
+
+### Miscellaneous
+
+* **deps:** update astral-sh/setup-uv digest to 61cb8a9 ([#85](https://github.com/damacus/unifi-release-announcer/issues/85)) ([16b06ea](https://github.com/damacus/unifi-release-announcer/commit/16b06ea10310b6102a21f6d6742194109e666ba4))
+* **deps:** update ghcr.io/astral-sh/uv:latest docker digest to 9a23023 ([#84](https://github.com/damacus/unifi-release-announcer/issues/84)) ([9c4503d](https://github.com/damacus/unifi-release-announcer/commit/9c4503da9f259c1af5eff5844dc0205407499cea))
+* **deps:** update mcr.microsoft.com/devcontainers/python:dev-3.13-trixie docker digest to d29d776 ([#83](https://github.com/damacus/unifi-release-announcer/issues/83)) ([d724566](https://github.com/damacus/unifi-release-announcer/commit/d7245664d8d8ac4061ce2c8a11781d41442a5292))
+
 ## [0.1.9](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.1.8...unifi-release-announcer-v0.1.9) (2026-01-04)
 
 
