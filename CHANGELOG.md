@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.1](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.0...unifi-release-announcer-v0.2.1) (2026-02-15)
+
+
+### Miscellaneous
+
+* **deps:** update actions/checkout action to v6 ([#89](https://github.com/damacus/unifi-release-announcer/issues/89)) ([cfac6ba](https://github.com/damacus/unifi-release-announcer/commit/cfac6bace42c6a3839fb3456e3e81b399555f8da))
+* **deps:** update actions/checkout digest to de0fac2 ([#99](https://github.com/damacus/unifi-release-announcer/issues/99)) ([77c4286](https://github.com/damacus/unifi-release-announcer/commit/77c4286f4b5c6c74d73dd2ac2be65749e61eb1f4))
+* **deps:** update actions/setup-python action to v6 ([#90](https://github.com/damacus/unifi-release-announcer/issues/90)) ([9a8e052](https://github.com/damacus/unifi-release-announcer/commit/9a8e0528c9650c9f5acae63106e99ba776502401))
+* **deps:** update astral-sh/setup-uv action to v7 ([#91](https://github.com/damacus/unifi-release-announcer/issues/91)) ([faa7292](https://github.com/damacus/unifi-release-announcer/commit/faa72923076338b00d2c7b97781086dbe7f5563b))
+* **deps:** update astral-sh/setup-uv digest to eac588a ([#98](https://github.com/damacus/unifi-release-announcer/issues/98)) ([13757be](https://github.com/damacus/unifi-release-announcer/commit/13757be5f4faeae704fba70237a95617a379f6a4))
+* **deps:** update dependency python to 3.14 ([#88](https://github.com/damacus/unifi-release-announcer/issues/88)) ([69332e9](https://github.com/damacus/unifi-release-announcer/commit/69332e9b0072b3ecff45bbb666c05dab2f643cf7))
+* **deps:** update docker/build-push-action action to v6.19.2 ([#103](https://github.com/damacus/unifi-release-announcer/issues/103)) ([8642409](https://github.com/damacus/unifi-release-announcer/commit/864240941b3f7cc7cab877809f9d199f7dc4263e))
+* **deps:** update docker/build-push-action digest to 10e90e3 ([#102](https://github.com/damacus/unifi-release-announcer/issues/102)) ([81b92df](https://github.com/damacus/unifi-release-announcer/commit/81b92df9d5d2a0511fcb2830b7fa3034bf30295b))
+* **deps:** update docker/login-action action to v3.7.0 ([#97](https://github.com/damacus/unifi-release-announcer/issues/97)) ([a02cc6e](https://github.com/damacus/unifi-release-announcer/commit/a02cc6e7067337c80fb8cd0e16f5ce678565c425))
+* **deps:** update docker/login-action digest to c94ce9f ([#96](https://github.com/damacus/unifi-release-announcer/issues/96)) ([95a2d4a](https://github.com/damacus/unifi-release-announcer/commit/95a2d4abbfed75d06a32bcb89224b62685fd9bea))
+* **deps:** update ghcr.io/astral-sh/uv:latest docker digest to 78a7ff9 ([#93](https://github.com/damacus/unifi-release-announcer/issues/93)) ([d96fe11](https://github.com/damacus/unifi-release-announcer/commit/d96fe11b5e3f3f5dc4405850a05b93e2e6c830da))
+* **deps:** update ghcr.io/astral-sh/uv:latest docker digest to 94a23af ([#101](https://github.com/damacus/unifi-release-announcer/issues/101)) ([2415fdb](https://github.com/damacus/unifi-release-announcer/commit/2415fdba271e3e6f7b306c1f91fe4bd37518933e))
+* **deps:** update mcr.microsoft.com/devcontainers/python:dev-3.13-trixie docker digest to c24c48c ([#94](https://github.com/damacus/unifi-release-announcer/issues/94)) ([d409fa4](https://github.com/damacus/unifi-release-announcer/commit/d409fa48d1d2cb400210f943976f5403cd1ea101))
+* **deps:** update python:3.14-alpine docker digest to faee120 ([#95](https://github.com/damacus/unifi-release-announcer/issues/95)) ([5489963](https://github.com/damacus/unifi-release-announcer/commit/548996340496ea40f9df29bf02d4d9a2c1f3496b))
+* **deps:** update step-security/harden-runner action to v2.14.2 ([#92](https://github.com/damacus/unifi-release-announcer/issues/92)) ([f4f475f](https://github.com/damacus/unifi-release-announcer/commit/f4f475fc4c85d7ea6cdb7d512951049a8be1f468))
+
 ## [0.2.0](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.1.9...unifi-release-announcer-v0.2.0) (2026-01-23)
 
 
