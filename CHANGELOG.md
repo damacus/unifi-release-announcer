@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.2](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.1...unifi-release-announcer-v0.2.2) (2026-03-02)
+
+
+### Miscellaneous
+
+* **deps:** update astral-sh/setup-uv digest to 5a095e7 ([#107](https://github.com/damacus/unifi-release-announcer/issues/107)) ([cef512c](https://github.com/damacus/unifi-release-announcer/commit/cef512c3536d898fd1f41bc7c881435ad86dfbfe))
+* **deps:** update ghcr.io/astral-sh/uv:latest docker digest to edd1fd8 ([#104](https://github.com/damacus/unifi-release-announcer/issues/104)) ([00ac483](https://github.com/damacus/unifi-release-announcer/commit/00ac48306597a24b25a561f207f1cae94ddd3043))
+* **deps:** update mcr.microsoft.com/devcontainers/python:dev-3.13-trixie docker digest to cc4ee5a ([#105](https://github.com/damacus/unifi-release-announcer/issues/105)) ([4de0ad6](https://github.com/damacus/unifi-release-announcer/commit/4de0ad62885c897489dedb3a2f7fab03c2e25cc2))
+* **deps:** update step-security/harden-runner action to v2.15.0 ([#106](https://github.com/damacus/unifi-release-announcer/issues/106)) ([7d83986](https://github.com/damacus/unifi-release-announcer/commit/7d83986abc83cc10484706d80f00942f46d26fd8))
+
 ## [0.2.1](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.0...unifi-release-announcer-v0.2.1) (2026-02-15)
 
 
