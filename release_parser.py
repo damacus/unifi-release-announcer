@@ -34,9 +34,7 @@ def parse_release(release: dict) -> dict:
         "stage": release["stage"],
         "version": release["version"],
         "created_at": release["createdAt"],
-        "created_date": datetime.fromisoformat(
-            release["createdAt"].replace("Z", "+00:00")
-        ).strftime("%Y-%m-%d"),
+        "created_date": datetime.fromisoformat(release["createdAt"].replace("Z", "+00:00")).strftime("%Y-%m-%d"),
         "stats": release.get("stats", {}),
         "has_engagement": release.get("hasUiEngagement", False),
     }
@@ -52,9 +50,7 @@ def filter_releases(
     filtered = releases
 
     if tags:
-        filtered = [
-            r for r in filtered if any(tag in r["tags"] for tag in tags)
-        ]
+        filtered = [r for r in filtered if any(tag in r["tags"] for tag in tags)]
 
     if stage:
         filtered = [r for r in filtered if r["stage"] == stage]
@@ -68,10 +64,7 @@ def filter_releases(
 def main() -> None:
     """Main function with CLI interface."""
     if len(sys.argv) < 2:
-        sys.stderr.write(
-            "Usage: python release_parser.py <json_file> "
-            "[--tags tag1,tag2] [--stage GA|EA] [--limit N]\n"
-        )
+        sys.stderr.write("Usage: python release_parser.py <json_file> [--tags tag1,tag2] [--stage GA|EA] [--limit N]\n")
         sys.exit(1)
 
     file_path = sys.argv[1]

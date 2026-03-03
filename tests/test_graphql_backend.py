@@ -5,7 +5,6 @@ import os
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import aiohttp
 from scraper_backends.graphql_backend import GraphQLBackend
 
 
@@ -29,13 +28,7 @@ class TestGraphQLBackendBase(unittest.TestCase):
         mock_response = MagicMock()
         mock_response.raise_for_status.return_value = None
         # json() is awaited in the implementation, so it must return an awaitable or be an AsyncMock
-        mock_response.json = AsyncMock(return_value={
-            "data": {
-                "releases": {
-                    "items": releases_data
-                }
-            }
-        })
+        mock_response.json = AsyncMock(return_value={"data": {"releases": {"items": releases_data}}})
         return mock_response
 
 
@@ -148,12 +141,12 @@ class TestGraphQLBackendTags(TestGraphQLBackendBase):
                 }
             }
         }
-        
+
         # Mock context managers: async with ClientSession() -> session
         # async with session.post() -> response
         mock_session = mock_session_cls.return_value
         mock_session.__aenter__.return_value = mock_session
-        
+
         mock_post_ctx = MagicMock()
         mock_session.post.return_value = mock_post_ctx
         mock_post_ctx.__aenter__.return_value = mock_response
@@ -182,10 +175,10 @@ class TestGraphQLBackendTags(TestGraphQLBackendBase):
         mock_response = AsyncMock()
         mock_response.raise_for_status = MagicMock()
         mock_response.json.return_value = {"data": {"releases": {"items": []}}}
-        
+
         mock_session = mock_session_cls.return_value
         mock_session.__aenter__.return_value = mock_session
-        
+
         mock_post_ctx = MagicMock()
         mock_session.post.return_value = mock_post_ctx
         mock_post_ctx.__aenter__.return_value = mock_response
@@ -213,30 +206,22 @@ class TestGraphQLBackendTags(TestGraphQLBackendBase):
 
 class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
     """Test suite for GraphQL backend filtering functionality."""
-    
+
     def _setup_mock(self, mock_session_cls: MagicMock, releases_data: list) -> None:
         """Helper to setup aiohttp mock chain."""
         mock_response = AsyncMock()
         mock_response.raise_for_status = MagicMock()
-        mock_response.json.return_value = {
-            "data": {
-                "releases": {
-                    "items": releases_data
-                }
-            }
-        }
-        
+        mock_response.json.return_value = {"data": {"releases": {"items": releases_data}}}
+
         mock_session = mock_session_cls.return_value
         mock_session.__aenter__.return_value = mock_session
-        
+
         mock_post_ctx = MagicMock()
         mock_session.post.return_value = mock_post_ctx
         mock_post_ctx.__aenter__.return_value = mock_response
 
     @patch("aiohttp.ClientSession")
-    def test_filters_android_releases_from_unifi_network(
-        self, mock_session_cls: MagicMock
-    ) -> None:
+    def test_filters_android_releases_from_unifi_network(self, mock_session_cls: MagicMock) -> None:
         """Test that Android releases are filtered out from unifi-network tag."""
         releases_data = [
             {
@@ -269,9 +254,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
         self.assertNotIn("Android", results[0]["title"])
 
     @patch("aiohttp.ClientSession")
-    def test_filters_ios_releases_from_unifi_network(
-        self, mock_session_cls: MagicMock
-    ) -> None:
+    def test_filters_ios_releases_from_unifi_network(self, mock_session_cls: MagicMock) -> None:
         """Test that iOS releases are filtered out from unifi-network tag."""
         releases_data = [
             {
@@ -319,9 +302,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
         self.assertIn("UniFi Network 2.0.0", results[0]["title"])
 
     @patch("aiohttp.ClientSession")
-    def test_filters_mobile_releases_from_all_tags(
-        self, mock_session_cls: MagicMock
-    ) -> None:
+    def test_filters_mobile_releases_from_all_tags(self, mock_session_cls: MagicMock) -> None:
         """Test that mobile releases are filtered from all tags, not just unifi-network."""
         releases_data = [
             {
@@ -353,11 +334,8 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
         self.assertIn("UniFi Protect 2.0.0", results[0]["title"])
         self.assertNotIn("Android", results[0]["title"])
 
-
     @patch("aiohttp.ClientSession")
-    def test_adds_ga_status_to_stable_releases(
-        self, mock_session_cls: MagicMock
-    ) -> None:
+    def test_adds_ga_status_to_stable_releases(self, mock_session_cls: MagicMock) -> None:
         """Test that GA status is added to stable releases."""
         releases_data = [
             {
@@ -381,9 +359,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
         self.assertEqual(results[0]["title"], "UniFi Network 8.0.28 (GA)")
 
     @patch("aiohttp.ClientSession")
-    def test_adds_beta_status_to_beta_releases(
-        self, mock_session_cls: MagicMock
-    ) -> None:
+    def test_adds_beta_status_to_beta_releases(self, mock_session_cls: MagicMock) -> None:
         """Test that Beta status is added to beta releases."""
         releases_data = [
             {
@@ -407,9 +383,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
         self.assertEqual(results[0]["title"], "UniFi Network 8.1.0-beta.1 (Beta)")
 
     @patch("aiohttp.ClientSession")
-    def test_adds_beta_status_to_rc_releases(
-        self, mock_session_cls: MagicMock
-    ) -> None:
+    def test_adds_beta_status_to_rc_releases(self, mock_session_cls: MagicMock) -> None:
         """Test that Beta status is added to release candidate versions."""
         releases_data = [
             {

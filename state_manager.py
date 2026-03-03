@@ -25,9 +25,7 @@ class StateManager:
                 self._state = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             if isinstance(e, json.JSONDecodeError):
-                logging.warning(
-                    f"Corrupted state file {self.state_file}, starting fresh"
-                )
+                logging.warning(f"Corrupted state file {self.state_file}, starting fresh")
             self._state = {}
 
     def _save_state(self) -> None:
