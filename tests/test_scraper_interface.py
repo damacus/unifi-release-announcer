@@ -3,6 +3,7 @@
 import asyncio
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
+
 from scraper_interface import Release, get_latest_release
 
 

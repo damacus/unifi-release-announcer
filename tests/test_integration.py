@@ -4,6 +4,7 @@ Integration test to verify the modular scraper works with main.py
 
 import asyncio
 import logging
+
 from scraper_interface import get_latest_release
 
 # Setup logging

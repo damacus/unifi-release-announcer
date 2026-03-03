@@ -15,6 +15,7 @@ import aiohttp
 if TYPE_CHECKING:
     from scraper_interface import Release
 
+
 class GraphQLBackend:
     """GraphQL-based scraper for UniFi releases."""
 
@@ -68,6 +69,18 @@ class GraphQLBackend:
         "wifiman",
     ]
 
+    _ALLOWED_TAGS_SET = frozenset(ALLOWED_TAGS)
+
+    # Pre-compiled unwanted patterns to avoid re-allocating on every release
+    UNWANTED_PATTERNS = (
+        "android",
+        "ios",
+        "iphone",
+        "ipad",
+        "sfp wizard",
+        "ups",
+    )
+
     def __init__(self) -> None:
         self.api_url = "https://community.svc.ui.com/"
         self.headers = {
@@ -108,7 +121,7 @@ class GraphQLBackend:
 
         # Validate all tags are in the allowed list
         for tag in tags:
-            if tag not in self.ALLOWED_TAGS:
+            if tag not in self._ALLOWED_TAGS_SET:
                 raise ValueError(f"Invalid tag '{tag}'. Allowed tags are: {', '.join(self.ALLOWED_TAGS)}")
 
         return tags
@@ -205,24 +218,14 @@ class GraphQLBackend:
                 release_tags = release_data.get("tags", [])
                 release_title = release_data.get("title", "").lower()
 
-                # Define unwanted release patterns to filter out
-                unwanted_patterns = [
-                    "android",
-                    "ios", 
-                    "iphone",
-                    "ipad",
-                    "sfp wizard",
-                    "ups",
-                ]
-                
                 # Check if this release should be filtered out
                 should_skip = False
-                for pattern in unwanted_patterns:
+                for pattern in self.UNWANTED_PATTERNS:
                     if pattern in release_title:
                         should_skip = True
                         logging.debug(f"Filtering out release '{release_data.get('title')}' due to pattern '{pattern}'")
                         break
-                
+
                 if should_skip:
                     continue
 
@@ -242,22 +245,19 @@ class GraphQLBackend:
             releases = []
             for tag, release_data in releases_by_tag.items():
                 # Determine GA/Beta status
-                version = release_data['version'].lower()
-                title = release_data['title'].lower()
-                
+                version = release_data["version"].lower()
+                title = release_data["title"].lower()
+
                 status_indicator = ""
-                if ("beta" in version or "beta" in title or
-                    "rc" in version or "candidate" in version):
+                if "beta" in version or "beta" in title or "rc" in version or "candidate" in version:
                     status_indicator = " (Beta)"
                 else:
                     status_indicator = " (GA)"
-                
+
                 # Create release dict that matches Release dataclass structure
                 release_dict = {
-                    "title": (f"{release_data['title']} "
-                             f"{release_data['version']}{status_indicator}"),
-                    "url": (f"https://community.ui.com/releases/"
-                           f"{release_data['slug']}/{release_data['id']}"),
+                    "title": (f"{release_data['title']} {release_data['version']}{status_indicator}"),
+                    "url": (f"https://community.ui.com/releases/{release_data['slug']}/{release_data['id']}"),
                     "tag": tag,
                 }
                 releases.append(release_dict)
