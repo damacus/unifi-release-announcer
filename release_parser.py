@@ -11,11 +11,14 @@ import sys
 from datetime import datetime
 
 
-def load_releases(file_path: str) -> list[dict]:
+from typing import Any
+
+
+def load_releases(file_path: str) -> list[dict[str, Any]]:
     """Load releases from JSON file."""
     with open(file_path) as f:
         data = json.load(f)
-    return data["data"]["releases"]["items"]
+    return list(data["data"]["releases"]["items"])
 
 
 def format_title_from_slug(slug: str) -> str:
