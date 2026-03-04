@@ -92,7 +92,7 @@ async def process_new_release(latest_release: Release, state_manager: StateManag
                 )
                 return  # Stop if we can't post
 
-        state_manager.set_last_url(latest_release.tag, latest_release.url)
+        await state_manager.set_last_url(latest_release.tag, latest_release.url)
 
     except discord.Forbidden:
         logging.error(
@@ -122,7 +122,11 @@ async def check_for_updates() -> None:
     """Periodically checks for new releases and posts them."""
     logging.info("Checking for new UniFi releases...")
 
-    state_manager = StateManager(STATE_FILE)
+    global state_manager
+    if state_manager is None:
+        logging.warning("state_manager not initialized. Skipping check.")
+        return
+
     latest_releases = await get_latest_releases()
 
     if not latest_releases:
@@ -139,9 +143,14 @@ async def check_for_updates() -> None:
         logging.info("No new releases found.")
 
 
+state_manager: StateManager | None = None
+
+
 @check_for_updates.before_loop
 async def before_check() -> None:
     """Ensures the bot is ready before the task loop starts."""
+    global state_manager
+    state_manager = await StateManager.create(STATE_FILE)
     await client.wait_until_ready()
 
 

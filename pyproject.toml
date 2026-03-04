@@ -9,6 +9,7 @@ requires-python = ">=3.13"
 dependencies = [
     "discord.py",
     "aiohttp>=3.9.0",
+    "aiofiles>=25.1.0",
 ]
 
 [project.optional-dependencies]
@@ -48,6 +49,12 @@ python_files = ["test_*.py"]
 addopts = "-v --tb=short"
 cache_dir = ".pytest_cache"
 pythonpath = ["."]
+
+[dependency-groups]
+dev = [
+    "types-aiofiles>=25.1.0.20251011",
+    "types-requests>=2.32.4.20260107",
+]
 
 [project.scripts]
 test = "pytest"

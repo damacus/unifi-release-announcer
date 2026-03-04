@@ -15,7 +15,7 @@ def load_releases(file_path: str) -> list[dict]:
     """Load releases from JSON file."""
     with open(file_path) as f:
         data = json.load(f)
-    return data["data"]["releases"]["items"]
+    return list(data["data"]["releases"]["items"]) # type: ignore
 
 
 def format_title_from_slug(slug: str) -> str:
