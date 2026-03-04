@@ -41,7 +41,7 @@ def format_release_message(release: Release) -> str:
     return f"🎉 **New UniFi Release Posted**\n\n🔗 [{title}]({url}) {platform_emoji}"
 
 
-# State management is now handled by StateManager class
+state_manager = StateManager(STATE_FILE)
 
 
 # --- Core Logic ---
@@ -122,7 +122,6 @@ async def check_for_updates() -> None:
     """Periodically checks for new releases and posts them."""
     logging.info("Checking for new UniFi releases...")
 
-    state_manager = StateManager(STATE_FILE)
     latest_releases = await get_latest_releases()
 
     if not latest_releases:
