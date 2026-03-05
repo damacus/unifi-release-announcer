@@ -92,7 +92,7 @@ async def process_new_release(latest_release: Release, state_manager: StateManag
                 )
                 return  # Stop if we can't post
 
-        state_manager.set_last_url(latest_release.tag, latest_release.url)
+        await state_manager.set_last_url(latest_release.tag, latest_release.url)
 
     except discord.Forbidden:
         logging.error(

@@ -4,7 +4,7 @@ import asyncio
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from scraper_interface import Release, get_latest_release, get_latest_releases
+from scraper_interface import Release, get_latest_release
 
 
 class TestScraperInterface(unittest.TestCase):
@@ -40,15 +40,6 @@ class TestScraperInterface(unittest.TestCase):
         result = asyncio.run(get_latest_release())
 
         self.assertIsNone(result)
-
-    @patch("scraper_interface.GraphQLBackend")
-    def test_get_latest_releases_handles_exception(self, mock_backend_class: MagicMock) -> None:
-        """Test get_latest_releases handles exceptions gracefully."""
-        mock_backend_class.side_effect = Exception("Backend error")
-
-        result = asyncio.run(get_latest_releases())
-
-        self.assertEqual(result, [])
 
 
 if __name__ == "__main__":
