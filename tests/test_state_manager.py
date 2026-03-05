@@ -3,6 +3,7 @@
 import os
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from state_manager import StateManager
 
@@ -108,6 +109,18 @@ class TestStateManager(unittest.TestCase):
 
         retrieved_url = self.state_manager.get_last_url("unifi-protect")
         self.assertEqual(retrieved_url, test_url)
+
+    @patch("state_manager.logging.error")
+    @patch("builtins.open")
+    def test_save_state_error(self, mock_open, mock_logging_error) -> None:
+        """Test that errors during save are logged and don't raise exceptions."""
+        # Make open raise an exception
+        error_msg = "Mocked permission denied"
+        mock_open.side_effect = PermissionError(error_msg)
+
+        self.state_manager._save_state()
+
+        mock_logging_error.assert_called_once_with(f"Failed to save state to {self.state_file}: {error_msg}")
 
     def test_get_all_tags(self) -> None:
         """Test getting all tags from state."""
