@@ -18,6 +18,7 @@ class StateManager:
         self.state_file = state_file
         self._state: dict[str, str] = {}
         self._load_state()
+        self._lock = asyncio.Lock()
 
     def _load_state(self) -> None:
         """Load state from JSON file."""
@@ -36,10 +37,6 @@ class StateManager:
                 json.dump(self._state, f, indent=2)
         except Exception as e:
             logging.error(f"Failed to save state to {self.state_file}: {e}")
-
-    async def _save_state(self) -> None:
-        """Save state to JSON file asynchronously."""
-        await asyncio.to_thread(self._sync_save)
 
     def get_last_url(self, tag: str) -> str | None:
         """
@@ -61,8 +58,9 @@ class StateManager:
             tag: The tag to set URL for
             url: The URL to store
         """
-        self._state[tag] = url
-        await self._save_state()
+        async with self._lock:
+            self._state[tag] = url
+            await asyncio.to_thread(self._sync_save)
 
     def has_seen_url(self, tag: str, url: str) -> bool:
         """
