@@ -15,13 +15,7 @@ def load_releases(file_path: str) -> list[dict]:
     """Load releases from JSON file."""
     with open(file_path) as f:
         data = json.load(f)
-    return data["data"]["releases"]["items"]
-
-
-def format_title_from_slug(slug: str) -> str:
-    """Convert slug to readable title if needed."""
-    # Replace hyphens with spaces and handle version numbers
-    return slug.replace("-", " ")
+    return list(data["data"]["releases"]["items"])
 
 
 def parse_release(release: dict) -> dict:

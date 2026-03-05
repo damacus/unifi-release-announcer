@@ -28,9 +28,9 @@ class TestScraperInterface(unittest.TestCase):
         mock_backend_class.assert_called_once()
         mock_backend.get_latest_release.assert_called_once()
         self.assertIsNotNone(result)
-        assert result is not None  # Type narrowing for mypy
-        self.assertEqual(result.title, "Test Release")
-        self.assertEqual(result.url, "https://test.com")
+        if result:
+            self.assertEqual(result.title, "Test Release")
+            self.assertEqual(result.url, "https://test.com")
 
     @patch("scraper_interface.GraphQLBackend")
     def test_get_latest_release_handles_exception(self, mock_backend_class: MagicMock) -> None:
