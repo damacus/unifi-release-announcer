@@ -1,5 +1,6 @@
 """State management for tracking last posted releases per tag."""
 
+import asyncio
 import json
 import logging
 
@@ -17,6 +18,7 @@ class StateManager:
         self.state_file = state_file
         self._state: dict[str, str] = {}
         self._load_state()
+        self._lock = asyncio.Lock()
 
     def _load_state(self) -> None:
         """Load state from JSON file."""
@@ -28,8 +30,8 @@ class StateManager:
                 logging.warning(f"Corrupted state file {self.state_file}, starting fresh")
             self._state = {}
 
-    def _save_state(self) -> None:
-        """Save state to JSON file."""
+    def _sync_save(self) -> None:
+        """Synchronous save state to JSON file."""
         try:
             with open(self.state_file, "w") as f:
                 json.dump(self._state, f, indent=2)
@@ -48,7 +50,7 @@ class StateManager:
         """
         return self._state.get(tag)
 
-    def set_last_url(self, tag: str, url: str) -> None:
+    async def set_last_url(self, tag: str, url: str) -> None:
         """
         Set the last posted URL for a tag.
 
@@ -56,8 +58,9 @@ class StateManager:
             tag: The tag to set URL for
             url: The URL to store
         """
-        self._state[tag] = url
-        self._save_state()
+        async with self._lock:
+            self._state[tag] = url
+            await asyncio.to_thread(self._sync_save)
 
     def has_seen_url(self, tag: str, url: str) -> bool:
         """
