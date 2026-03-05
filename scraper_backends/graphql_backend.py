@@ -198,7 +198,7 @@ class GraphQLBackend:
             payload = {"query": query, "variables": variables}
 
             async with aiohttp.ClientSession() as session:
-                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=30) as response:
+                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)) as response:
                     response.raise_for_status()
                     data = await response.json()
 
@@ -362,7 +362,7 @@ class GraphQLBackend:
             logging.info("Fetching latest UniFi Protect release")
 
             async with aiohttp.ClientSession() as session:
-                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=30) as response:
+                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)) as response:
                     response.raise_for_status()
                     data = await response.json()
 
