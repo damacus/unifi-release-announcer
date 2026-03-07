@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.3](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.2...unifi-release-announcer-v0.2.3) (2026-03-07)
+
+
+### Miscellaneous
+
+* **deps:** update docker/build-push-action action to v7 ([#129](https://github.com/damacus/unifi-release-announcer/issues/129)) ([464db78](https://github.com/damacus/unifi-release-announcer/commit/464db783d993e6744d00d21d899a09c4d3fa10c2))
+* **deps:** update docker/login-action action to v4 ([#120](https://github.com/damacus/unifi-release-announcer/issues/120)) ([fb350ea](https://github.com/damacus/unifi-release-announcer/commit/fb350ea9416316e8dbe3868660544651a8abaf60))
+* **deps:** update docker/login-action action to v4 ([#124](https://github.com/damacus/unifi-release-announcer/issues/124)) ([677cd4e](https://github.com/damacus/unifi-release-announcer/commit/677cd4e8fdf4034b25f49c0c301f32b827de5adc))
+* **deps:** update docker/metadata-action action to v6 ([#127](https://github.com/damacus/unifi-release-announcer/issues/127)) ([e5a87d8](https://github.com/damacus/unifi-release-announcer/commit/e5a87d8cbf234b2add5d9585b3b6466b7e87ff43))
+* **deps:** update docker/setup-buildx-action action to v4 ([#123](https://github.com/damacus/unifi-release-announcer/issues/123)) ([85f8cff](https://github.com/damacus/unifi-release-announcer/commit/85f8cffed880aeb22daaf25aae89677b662c74ff))
+* **deps:** update docker/setup-qemu-action action to v4 ([#121](https://github.com/damacus/unifi-release-announcer/issues/121)) ([d371701](https://github.com/damacus/unifi-release-announcer/commit/d3717010ab369588237331afc349b7e6cb0aaf92))
+* **deps:** update docker/setup-qemu-action action to v4 ([#125](https://github.com/damacus/unifi-release-announcer/issues/125)) ([0ac764c](https://github.com/damacus/unifi-release-announcer/commit/0ac764c705c78e27ab8c6ff5663619a1fe94e41e))
+* **deps:** update ghcr.io/astral-sh/uv:latest docker digest to 10902f5 ([#130](https://github.com/damacus/unifi-release-announcer/issues/130)) ([2b59058](https://github.com/damacus/unifi-release-announcer/commit/2b590587ac4b28807a5ef0a08e9d3fd43e870ba5))
+* **deps:** update ghcr.io/astral-sh/uv:latest docker digest to 88234bc ([#110](https://github.com/damacus/unifi-release-announcer/issues/110)) ([bd33a19](https://github.com/damacus/unifi-release-announcer/commit/bd33a19addbb1d3eb3002e7563af4ee3b88d70f2))
+
 ## [0.2.2](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.1...unifi-release-announcer-v0.2.2) (2026-03-02)
 
 
