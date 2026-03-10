@@ -38,6 +38,8 @@ def parse_release(release: dict[str, Any]) -> dict[str, Any]:
         "created_date": datetime.fromisoformat(release["createdAt"].replace("Z", "+00:00")).strftime("%Y-%m-%d"),
         "stats": release.get("stats", {}),
         "has_engagement": release.get("hasUiEngagement", False),
+        "author": release.get("author"),
+        "last_activity": release.get("lastActivityAt"),
     }
 
 

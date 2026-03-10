@@ -33,6 +33,8 @@ class TestReleaseParser(unittest.TestCase):
                 "createdAt": "2023-05-15T10:00:00Z",
                 "stats": {"views": 1000},
                 "hasUiEngagement": True,
+                "author": {"username": "UI-Team"},
+                "lastActivityAt": "2023-05-15T12:00:00Z",
             },
             {
                 "title": "UniFi Network Application 7.4.156",
@@ -91,6 +93,8 @@ class TestReleaseParser(unittest.TestCase):
         self.assertEqual(parsed["created_date"], "2023-05-15")
         self.assertEqual(parsed["stats"], {"views": 1000})
         self.assertTrue(parsed["has_engagement"])
+        self.assertEqual(parsed["author"], {"username": "UI-Team"})
+        self.assertEqual(parsed["last_activity"], "2023-05-15T12:00:00Z")
 
     def test_parse_release_missing_optional(self) -> None:
         """Test parsing a release missing optional fields."""
@@ -100,6 +104,8 @@ class TestReleaseParser(unittest.TestCase):
         self.assertEqual(parsed["stats"], {})
         self.assertFalse(parsed["has_engagement"])
         self.assertEqual(parsed["created_date"], "2023-04-20")
+        self.assertIsNone(parsed["author"])
+        self.assertIsNone(parsed["last_activity"])
 
     def test_filter_releases_by_tag(self) -> None:
         """Test filtering releases by a single tag."""

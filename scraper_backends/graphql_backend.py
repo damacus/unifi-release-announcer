@@ -7,10 +7,11 @@ More efficient and reliable than web scraping.
 
 import logging
 import os
-from datetime import datetime
 from typing import TYPE_CHECKING
 
 import aiohttp
+
+from release_parser import parse_release
 
 if TYPE_CHECKING:
     from scraper_interface import Release
@@ -393,23 +394,6 @@ class GraphQLBackend:
             logging.error(f"Unexpected error in GraphQL backend: {e}")
             return None
 
-    def _parse_release(self, release: dict) -> dict:
-        """Parse a single release into structured format."""
-        return {
-            "title": release["title"],
-            "slug": release["slug"],
-            "url": f"https://community.ui.com/releases/{release['slug']}",
-            "tags": release["tags"],
-            "stage": release["stage"],
-            "version": release["version"],
-            "created_at": release["createdAt"],
-            "created_date": datetime.fromisoformat(release["createdAt"].replace("Z", "+00:00")).strftime("%Y-%m-%d"),
-            "stats": release.get("stats", {}),
-            "has_engagement": release.get("hasUiEngagement", False),
-            "author": release.get("author"),
-            "last_activity": release.get("lastActivityAt"),
-        }
-
     async def get_release_details(self, release_id: str) -> dict | None:
         """
         Get detailed information for a specific release.
@@ -465,7 +449,7 @@ class GraphQLBackend:
 
             release = data.get("data", {}).get("release")
             if release:
-                return self._parse_release(release)
+                return parse_release(release)
 
             return None
 
