@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.4](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.3...unifi-release-announcer-v0.2.4) (2026-03-14)
+
+
+### Miscellaneous
+
+* **deps:** update astral-sh/setup-uv digest to e06108d ([#132](https://github.com/damacus/unifi-release-announcer/issues/132)) ([e521256](https://github.com/damacus/unifi-release-announcer/commit/e521256de5f0c83a197276d10db93b18e827e49d))
+* **deps:** update ghcr.io/astral-sh/uv:latest docker digest to cbe0a44 ([#133](https://github.com/damacus/unifi-release-announcer/issues/133)) ([b128acf](https://github.com/damacus/unifi-release-announcer/commit/b128acfe729c44425113d84c2bb1e512c08ca9c4))
+* **deps:** update mcr.microsoft.com/devcontainers/python:dev-3.13-trixie docker digest to 2ebe107 ([#131](https://github.com/damacus/unifi-release-announcer/issues/131)) ([094f451](https://github.com/damacus/unifi-release-announcer/commit/094f45143b040351f6d73a7def6fe899c5bb0b5d))
+
 ## [0.2.3](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.2...unifi-release-announcer-v0.2.3) (2026-03-07)
 
 
