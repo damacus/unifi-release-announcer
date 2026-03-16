@@ -19,12 +19,6 @@ def load_releases(file_path: str) -> list[dict[str, Any]]:
     return list(data["data"]["releases"]["items"])
 
 
-def format_title_from_slug(slug: str) -> str:
-    """Convert slug to readable title if needed."""
-    # Replace hyphens with spaces and handle version numbers
-    return slug.replace("-", " ")
-
-
 def parse_release(release: dict[str, Any]) -> dict[str, Any]:
     """Parse a single release into structured format."""
     return {
