@@ -44,7 +44,45 @@ def format_release_message(release: Release) -> str:
 # State management is now handled by StateManager class
 
 
+async def _post_to_forum(channel: discord.ForumChannel, release: Release, message: str) -> None:
+    """Posts a release announcement to a forum channel."""
+    thread = await channel.create_thread(name=f"UniFi Release: {release.title}", content=message)
+    logging.info("Posted to forum thread: %s", thread.thread.name)
+
+
+async def _post_to_text_channel(channel: discord.TextChannel, message: str) -> None:
+    """Posts a release announcement to a text channel."""
+    await channel.send(message)
+    logging.info("Posted to text channel: %s", channel.name)
+
+
+async def _post_to_generic_channel(
+    channel: discord.abc.GuildChannel | discord.abc.PrivateChannel | discord.Thread, message: str
+) -> bool:
+    """Posts a release announcement to a generic channel with a send method."""
+    logging.warning(
+        "Channel type %s is not explicitly supported.",
+        type(channel).__name__,
+    )
+    # Fallback for any other channel types that have a 'send' method
+    if hasattr(channel, "send"):
+        await channel.send(message)  # type: ignore[union-attr]
+        logging.info(
+            "Announcement posted to channel: %s",
+            getattr(channel, "name", "N/A"),
+        )
+        return True
+
+    logging.error(
+        "Channel type %s does not support posting messages.",
+        type(channel).__name__,
+    )
+    return False
+
+
 # --- Core Logic ---
+
+
 async def process_new_release(latest_release: Release, state_manager: StateManager) -> None:
     """Processes a new release by sending a Discord notification."""
     logging.info(f"New release found: {latest_release.title} (tag: {latest_release.tag})")
@@ -68,28 +106,12 @@ async def process_new_release(latest_release: Release, state_manager: StateManag
 
     try:
         if isinstance(channel, discord.ForumChannel):
-            thread = await channel.create_thread(name=f"UniFi Release: {latest_release.title}", content=message)
-            logging.info("Posted to forum thread: %s", thread.thread.name)
+            await _post_to_forum(channel, latest_release, message)
         elif isinstance(channel, discord.TextChannel):
-            await channel.send(message)
-            logging.info("Posted to text channel: %s", channel.name)
+            await _post_to_text_channel(channel, message)
         else:
-            logging.warning(
-                "Channel type %s is not explicitly supported.",
-                type(channel).__name__,
-            )
-            # Fallback for any other channel types that have a 'send' method
-            if hasattr(channel, "send"):
-                await channel.send(message)
-                logging.info(
-                    "Announcement posted to channel: %s",
-                    getattr(channel, "name", "N/A"),
-                )
-            else:
-                logging.error(
-                    "Channel type %s does not support posting messages.",
-                    type(channel).__name__,
-                )
+            success = await _post_to_generic_channel(channel, message)
+            if not success:
                 return  # Stop if we can't post
 
         await state_manager.set_last_url(latest_release.tag, latest_release.url)
