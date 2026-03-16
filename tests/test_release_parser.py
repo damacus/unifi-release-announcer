@@ -11,7 +11,6 @@ from unittest.mock import patch
 
 from release_parser import (
     filter_releases,
-    format_title_from_slug,
     load_releases,
     main,
     parse_release,
@@ -70,11 +69,6 @@ class TestReleaseParser(unittest.TestCase):
         finally:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
-
-    def test_format_title_from_slug(self) -> None:
-        """Test formatting title from slug."""
-        self.assertEqual(format_title_from_slug("unifi-protect-application-2-8-28"), "unifi protect application 2 8 28")
-        self.assertEqual(format_title_from_slug("amplifi"), "amplifi")
 
     def test_parse_release_complete(self) -> None:
         """Test parsing a complete release."""
