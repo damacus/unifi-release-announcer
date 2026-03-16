@@ -22,3 +22,11 @@ spec:
           envFrom:
             - secretRef:
                 name: unifi-release-announcer-secrets
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
