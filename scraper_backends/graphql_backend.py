@@ -5,6 +5,7 @@ Uses the UniFi Community GraphQL API to fetch release data directly.
 More efficient and reliable than web scraping.
 """
 
+import contextlib
 import logging
 import os
 from datetime import datetime
@@ -81,8 +82,9 @@ class GraphQLBackend:
         "ups",
     )
 
-    def __init__(self) -> None:
+    def __init__(self, session: aiohttp.ClientSession | None = None) -> None:
         self.api_url = "https://community.svc.ui.com/"
+        self.session = session
         self.headers = {
             "accept": "application/graphql-response+json, application/json",
             "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
@@ -96,6 +98,15 @@ class GraphQLBackend:
                 "Chrome/139.0.0.0 Safari/537.36"
             ),
         }
+
+    @contextlib.asynccontextmanager
+    async def _get_session(self):
+        """Yields the injected session if it exists, otherwise a temporary one."""
+        if self.session:
+            yield self.session
+        else:
+            async with aiohttp.ClientSession() as session:
+                yield session
 
     def get_allowed_tags(self) -> list[str]:
         """Get the list of all allowed tags."""
@@ -198,8 +209,8 @@ class GraphQLBackend:
 
             payload = {"query": query, "variables": variables}
 
-            async with aiohttp.ClientSession() as session:
-                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=30) as response:
+            async with self._get_session() as session:
+                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)) as response:
                     response.raise_for_status()
                     data = await response.json()
 
@@ -362,8 +373,8 @@ class GraphQLBackend:
 
             logging.info("Fetching latest UniFi Protect release")
 
-            async with aiohttp.ClientSession() as session:
-                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=30) as response:
+            async with self._get_session() as session:
+                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)) as response:
                     response.raise_for_status()
                     data = await response.json()
 
@@ -454,8 +465,8 @@ class GraphQLBackend:
 
             payload = {"query": query, "variables": {"id": release_id}, "operationName": "ReleaseDetailQuery"}
 
-            async with aiohttp.ClientSession() as session:
-                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=30) as response:
+            async with self._get_session() as session:
+                async with session.post(self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)) as response:
                     response.raise_for_status()
                     data = await response.json()
 
