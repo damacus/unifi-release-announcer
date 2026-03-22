@@ -137,6 +137,117 @@ class GraphQLBackend:
 
         return tags
 
+    def _format_release_dict(self, tag: str, release_data: dict) -> dict[str, str]:
+        """Format a single release dictionary with title, url, and tag."""
+        # Determine GA/Beta status
+        version = release_data["version"].lower()
+        title = release_data["title"].lower()
+
+        status_indicator = ""
+        if "beta" in version or "beta" in title or "rc" in version or "candidate" in version:
+            status_indicator = " (Beta)"
+        else:
+            status_indicator = " (GA)"
+
+        # Create release dict that matches Release dataclass structure
+        return {
+            "title": (f"{release_data['title']} {release_data['version']}{status_indicator}"),
+            "url": (f"https://community.ui.com/releases/{release_data['slug']}/{release_data['id']}"),
+            "tag": tag,
+        }
+
+    def _process_releases_response(self, all_releases: list[dict], tags: list[str]) -> dict[str, dict]:
+        """Filter and group releases by tag, returning the latest for each."""
+        releases_by_tag = {}
+        for release_data in all_releases:
+            release_tags = release_data.get("tags", [])
+            release_title = release_data.get("title", "").lower()
+
+            # Check if this release should be filtered out
+            should_skip = False
+            for pattern in self.UNWANTED_PATTERNS:
+                if pattern in release_title:
+                    should_skip = True
+                    logging.debug(f"Filtering out release '{release_data.get('title')}' due to pattern '{pattern}'")
+                    break
+
+            if should_skip:
+                continue
+
+            # Find which of our configured tags this release belongs to
+            for tag in tags:
+                if tag in release_tags:
+                    if tag not in releases_by_tag:
+                        releases_by_tag[tag] = release_data
+                    else:
+                        # Keep the most recent (releases are sorted by createdAt DESC)
+                        current_date = releases_by_tag[tag]["createdAt"]
+                        new_date = release_data["createdAt"]
+                        if new_date > current_date:
+                            releases_by_tag[tag] = release_data
+
+        return releases_by_tag
+
+    def _build_latest_releases_payload(self, tags: list[str]) -> dict:
+        """Build the GraphQL query payload for fetching latest releases."""
+        query = """
+        query ReleaseFeedListQuery(
+            $tags: [String!],
+            $betas: [String!],
+            $alphas: [String!],
+            $offset: Int,
+            $limit: Int,
+            $sortBy: ReleasesSortBy,
+            $userIsFollowing: Boolean,
+            $featuredOnly: Boolean,
+            $searchTerm: String,
+            $filterTags: [String!],
+            $filterEATags: [String!],
+            $statuses: [ReleaseStatus!]
+        ) {
+          releases(
+            tags: $tags
+            betas: $betas
+            alphas: $alphas
+            offset: $offset
+            limit: $limit
+            sortBy: $sortBy
+            userIsFollowing: $userIsFollowing
+            featuredOnly: $featuredOnly
+            searchTerm: $searchTerm
+            filterTags: $filterTags
+            filterEATags: $filterEATags
+            statuses: $statuses
+          ) {
+            items {
+              id
+              title
+              version
+              slug
+              createdAt
+              tags
+            }
+          }
+        }
+        """
+
+        variables = {
+            "tags": tags,
+            "betas": [],
+            "alphas": [],
+            "offset": 0,
+            "limit": 50,
+            "sortBy": None,
+            "userIsFollowing": False,
+            "featuredOnly": False,
+            "searchTerm": "",
+            "filterTags": [],
+            "filterEATags": [],
+            "statuses": ["PUBLISHED"],
+        }
+
+        return {"query": query, "variables": variables}
+
     async def get_latest_releases(self) -> list[dict[str, str]]:
         """
         Get the latest releases for all configured tags in a single query.
@@ -151,63 +262,7 @@ class GraphQLBackend:
                 logging.warning("No tags configured for searching!")
                 return []
 
-            query = """
-            query ReleaseFeedListQuery(
-                $tags: [String!],
-                $betas: [String!],
-                $alphas: [String!],
-                $offset: Int,
-                $limit: Int,
-                $sortBy: ReleasesSortBy,
-                $userIsFollowing: Boolean,
-                $featuredOnly: Boolean,
-                $searchTerm: String,
-                $filterTags: [String!],
-                $filterEATags: [String!],
-                $statuses: [ReleaseStatus!]
-            ) {
-              releases(
-                tags: $tags
-                betas: $betas
-                alphas: $alphas
-                offset: $offset
-                limit: $limit
-                sortBy: $sortBy
-                userIsFollowing: $userIsFollowing
-                featuredOnly: $featuredOnly
-                searchTerm: $searchTerm
-                filterTags: $filterTags
-                filterEATags: $filterEATags
-                statuses: $statuses
-              ) {
-                items {
-                  id
-                  title
-                  version
-                  slug
-                  createdAt
-                  tags
-                }
-              }
-            }
-            """
-
-            variables = {
-                "tags": tags,
-                "betas": [],
-                "alphas": [],
-                "offset": 0,
-                "limit": 50,
-                "sortBy": None,
-                "userIsFollowing": False,
-                "featuredOnly": False,
-                "searchTerm": "",
-                "filterTags": [],
-                "filterEATags": [],
-                "statuses": ["PUBLISHED"],
-            }
-
-            payload = {"query": query, "variables": variables}
+            payload = self._build_latest_releases_payload(tags)
 
             async with self._get_session() as session:
                 async with session.post(self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)) as response:
@@ -223,55 +278,12 @@ class GraphQLBackend:
 
             logging.info(f"Found {len(all_releases)} total releases from API")
 
-            # Group releases by tag and get the latest for each
-            releases_by_tag = {}
-            for release_data in all_releases:
-                release_tags = release_data.get("tags", [])
-                release_title = release_data.get("title", "").lower()
-
-                # Check if this release should be filtered out
-                should_skip = False
-                for pattern in self.UNWANTED_PATTERNS:
-                    if pattern in release_title:
-                        should_skip = True
-                        logging.debug(f"Filtering out release '{release_data.get('title')}' due to pattern '{pattern}'")
-                        break
-
-                if should_skip:
-                    continue
-
-                # Find which of our configured tags this release belongs to
-                for tag in tags:
-                    if tag in release_tags:
-                        if tag not in releases_by_tag:
-                            releases_by_tag[tag] = release_data
-                        else:
-                            # Keep the most recent (releases are sorted by createdAt DESC)
-                            current_date = releases_by_tag[tag]["createdAt"]
-                            new_date = release_data["createdAt"]
-                            if new_date > current_date:
-                                releases_by_tag[tag] = release_data
+            releases_by_tag = self._process_releases_response(all_releases, tags)
 
             # Convert to Release objects
             releases = []
             for tag, release_data in releases_by_tag.items():
-                # Determine GA/Beta status
-                version = release_data["version"].lower()
-                title = release_data["title"].lower()
-
-                status_indicator = ""
-                if "beta" in version or "beta" in title or "rc" in version or "candidate" in version:
-                    status_indicator = " (Beta)"
-                else:
-                    status_indicator = " (GA)"
-
-                # Create release dict that matches Release dataclass structure
-                release_dict = {
-                    "title": (f"{release_data['title']} {release_data['version']}{status_indicator}"),
-                    "url": (f"https://community.ui.com/releases/{release_data['slug']}/{release_data['id']}"),
-                    "tag": tag,
-                }
-                releases.append(release_dict)
+                releases.append(self._format_release_dict(tag, release_data))
 
             return releases
 
