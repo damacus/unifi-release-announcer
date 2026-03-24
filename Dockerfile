@@ -27,16 +27,25 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
+# Create a non-root user and set up cache directory
+RUN addgroup -S appgroup && \
+    adduser -S appuser -G appgroup && \
+    mkdir /cache && \
+    chown appuser:appgroup /cache
+
 # Copy virtual environment from builder
-COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder --chown=appuser:appgroup /app/.venv /app/.venv
 
 # Set the path to include the virtual environment
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Copy application files
-COPY scraper_backends/ /app/scraper_backends/
-COPY main.py /app/main.py
-COPY scraper_interface.py /app/scraper_interface.py
-COPY state_manager.py /app/state_manager.py
+COPY --chown=appuser:appgroup scraper_backends/ /app/scraper_backends/
+COPY --chown=appuser:appgroup main.py /app/main.py
+COPY --chown=appuser:appgroup scraper_interface.py /app/scraper_interface.py
+COPY --chown=appuser:appgroup state_manager.py /app/state_manager.py
+
+# Switch to non-root user
+USER appuser
 
 CMD ["python", "main.py"]
