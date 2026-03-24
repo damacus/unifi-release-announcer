@@ -1,4 +1,3 @@
-
 with open("release_parser.py") as f:
     content = f.read()
 
