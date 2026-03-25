@@ -6,7 +6,7 @@ FROM mcr.microsoft.com/devcontainers/python:dev-3.13-trixie@sha256:ec498e1356dd4
 
 WORKDIR /app
 
-COPY --from=ghcr.io/astral-sh/uv:latest@sha256:72ab0aeb448090480ccabb99fb5f52b0dc3c71923bffb5e2e26517a1c27b7fec /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:latest@sha256:fc93e9ecd7218e9ec8fba117af89348eef8fd2463c50c13347478769aaedd0ce /uv /uvx /bin/
 
 RUN apt-get update && apt-get install -y \
     wget \
