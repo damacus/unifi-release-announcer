@@ -2,9 +2,12 @@
 
 import logging
 from dataclasses import dataclass
+
 import aiohttp
 
 from scraper_backends.graphql_backend import GraphQLBackend
+
+_backend = GraphQLBackend()
 
 
 @dataclass
@@ -28,7 +31,7 @@ async def get_latest_release(session: aiohttp.ClientSession | None = None) -> Re
         Release object if found, None otherwise
     """
     try:
-        scraper = GraphQLBackend(session=session)
+        scraper = GraphQLBackend(session=session) if session else _backend
         return await scraper.get_latest_release()
     except Exception as e:
         logging.error(f"Error fetching release: {e}")
@@ -45,7 +48,7 @@ async def get_latest_releases(session: aiohttp.ClientSession | None = None) -> l
         List of Release objects, one per configured tag (if available)
     """
     try:
-        scraper = GraphQLBackend(session=session)
+        scraper = GraphQLBackend(session=session) if session else _backend
         release_dicts = await scraper.get_latest_releases()
         # Convert dicts to Release objects
         releases = []
