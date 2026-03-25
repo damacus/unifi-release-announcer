@@ -430,7 +430,6 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
         self.assertIn("(Beta)", results[0]["title"])
 
 
-
 class TestGraphQLBackendDetails(TestGraphQLBackendBase):
     """Test suite for GraphQL backend release details functionality."""
 
@@ -467,16 +466,9 @@ class TestGraphQLBackendDetails(TestGraphQLBackendBase):
                         "id": "auth-1",
                         "username": "ui-admin",
                         "isEmployee": True,
-                        "avatar": {
-                            "color": "#000000",
-                            "content": "U",
-                            "image": None
-                        }
+                        "avatar": {"color": "#000000", "content": "U", "image": None},
                     },
-                    "stats": {
-                        "comments": 10,
-                        "views": 100
-                    }
+                    "stats": {"comments": 10, "views": 100},
                 }
             }
         }
@@ -499,13 +491,7 @@ class TestGraphQLBackendDetails(TestGraphQLBackendBase):
     @patch("aiohttp.ClientSession")
     def test_get_release_details_graphql_error(self, mock_session_cls) -> None:
         """Test handling of GraphQL errors in response."""
-        response_data = {
-            "errors": [
-                {
-                    "message": "Cannot query field 'invalid' on type 'Release'."
-                }
-            ]
-        }
+        response_data = {"errors": [{"message": "Cannot query field 'invalid' on type 'Release'."}]}
         self._setup_mock(mock_session_cls, response_data)
 
         backend = GraphQLBackend()
@@ -516,11 +502,7 @@ class TestGraphQLBackendDetails(TestGraphQLBackendBase):
     @patch("aiohttp.ClientSession")
     def test_get_release_details_not_found(self, mock_session_cls) -> None:
         """Test handling of release not found (null release data)."""
-        response_data = {
-            "data": {
-                "release": None
-            }
-        }
+        response_data = {"data": {"release": None}}
         self._setup_mock(mock_session_cls, response_data)
 
         backend = GraphQLBackend()
@@ -555,6 +537,7 @@ class TestGraphQLBackendDetails(TestGraphQLBackendBase):
         result = asyncio.run(backend.get_release_details("rel-123"))
 
         self.assertIsNone(result)
+
 
 if __name__ == "__main__":
     unittest.main()

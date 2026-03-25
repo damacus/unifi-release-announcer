@@ -1,8 +1,8 @@
 import logging
 import os
 import sys
-import aiohttp
 
+import aiohttp
 import discord
 from discord.ext import tasks
 
@@ -20,6 +20,7 @@ DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 DISCORD_CHANNEL_ID = os.getenv("DISCORD_CHANNEL_ID")
 STATE_FILE = "/cache/release_state.json"
 
+
 # --- Bot Setup ---
 class AnnouncerClient(discord.Client):
     def __init__(self, *args, **kwargs):
@@ -33,6 +34,7 @@ class AnnouncerClient(discord.Client):
         if self.session:
             await self.session.close()
         await super().close()
+
 
 intents = discord.Intents.default()
 client = AnnouncerClient(intents=intents)
