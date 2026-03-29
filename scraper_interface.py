@@ -50,12 +50,7 @@ async def get_latest_releases(session: aiohttp.ClientSession | None = None) -> l
     try:
         scraper = GraphQLBackend(session=session) if session else _backend
         release_dicts = await scraper.get_latest_releases()
-        # Convert dicts to Release objects
-        releases = []
-        for release_dict in release_dicts:
-            release = Release(title=release_dict["title"], url=release_dict["url"], tag=release_dict["tag"])
-            releases.append(release)
-        return releases
+        return [Release(title=r["title"], url=r["url"], tag=r["tag"]) for r in release_dicts]
     except Exception as e:
         logging.error(f"Error fetching releases: {e}")
         return []
