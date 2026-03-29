@@ -138,9 +138,9 @@ async def process_new_release(latest_release: Release, state_manager: StateManag
             getattr(channel, "name", channel.id),
         )
     except discord.HTTPException as e:
-        logging.error(f"Failed to send message due to an HTTP exception: {e}")
+        logging.error("Failed to send message due to an HTTP exception: %s", e)
     except Exception as e:
-        logging.error(f"An unexpected error occurred while posting: {e}")
+        logging.error("An unexpected error occurred while posting: %s", e)
 
 
 # --- Bot Events ---

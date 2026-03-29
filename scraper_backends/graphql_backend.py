@@ -104,6 +104,15 @@ class GraphQLBackend:
             async with aiohttp.ClientSession() as session:
                 yield session
 
+    async def _make_graphql_request(self, payload: dict) -> dict:
+        """Execute a GraphQL request and return the parsed JSON response."""
+        async with self._get_session() as session:
+            async with session.post(
+                self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)
+            ) as response:
+                response.raise_for_status()
+                return await response.json()
+
     def get_allowed_tags(self) -> list[str]:
         """Get the list of all allowed tags."""
         return self.ALLOWED_TAGS.copy()
@@ -260,12 +269,7 @@ class GraphQLBackend:
 
             payload = self._build_latest_releases_payload(tags)
 
-            async with self._get_session() as session:
-                async with session.post(
-                    self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)
-                ) as response:
-                    response.raise_for_status()
-                    data = await response.json()
+            data = await self._make_graphql_request(payload)
 
             all_releases = data.get("data", {}).get("releases", {}).get("items", [])
 
@@ -383,12 +387,7 @@ class GraphQLBackend:
 
             logging.info("Fetching latest UniFi Protect release")
 
-            async with self._get_session() as session:
-                async with session.post(
-                    self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)
-                ) as response:
-                    response.raise_for_status()
-                    data = await response.json()
+            data = await self._make_graphql_request(payload)
 
             if "errors" in data:
                 logging.error(f"GraphQL errors: {data['errors']}")
@@ -475,12 +474,7 @@ class GraphQLBackend:
 
             payload = {"query": query, "variables": {"id": release_id}, "operationName": "ReleaseDetailQuery"}
 
-            async with self._get_session() as session:
-                async with session.post(
-                    self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)
-                ) as response:
-                    response.raise_for_status()
-                    data = await response.json()
+            data = await self._make_graphql_request(payload)
 
             if "errors" in data:
                 logging.error(f"GraphQL errors: {data['errors']}")
