@@ -169,14 +169,9 @@ class GraphQLBackend:
             release_title = release_data.get("title", "").lower()
 
             # Check if this release should be filtered out
-            should_skip = False
-            for pattern in self.UNWANTED_PATTERNS:
-                if pattern in release_title:
-                    should_skip = True
-                    logging.debug(f"Filtering out release '{release_data.get('title')}' due to pattern '{pattern}'")
-                    break
-
-            if should_skip:
+            matched_pattern = next((p for p in self.UNWANTED_PATTERNS if p in release_title), None)
+            if matched_pattern:
+                logging.debug("Filtering out release '%s' due to pattern '%s'", release_data.get("title"), matched_pattern)
                 continue
 
             # Find which of our configured tags this release belongs to

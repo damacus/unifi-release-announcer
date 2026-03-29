@@ -19,6 +19,7 @@ logging.basicConfig(
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 DISCORD_CHANNEL_ID = os.getenv("DISCORD_CHANNEL_ID")
 STATE_FILE = "/cache/release_state.json"
+state_manager = StateManager(STATE_FILE)
 
 
 # --- Bot Setup ---
@@ -160,7 +161,6 @@ async def check_for_updates() -> None:
     """Periodically checks for new releases and posts them."""
     logging.info("Checking for new UniFi releases...")
 
-    state_manager = StateManager(STATE_FILE)
     latest_releases = await get_latest_releases(session=client.session)
 
     if not latest_releases:
