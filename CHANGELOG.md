@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.6](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.5...unifi-release-announcer-v0.2.6) (2026-03-29)
+
+
+### Bug Fixes
+
+* set explicit UID/GID 1000 for appuser to match K8s runAsUser ([#156](https://github.com/damacus/unifi-release-announcer/issues/156)) ([dc27576](https://github.com/damacus/unifi-release-announcer/commit/dc275766a88d6418dd540d8f7316cbbdcf7a73f2))
+
 ## [0.2.5](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.4...unifi-release-announcer-v0.2.5) (2026-03-25)
 
 
