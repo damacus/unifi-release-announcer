@@ -9,12 +9,8 @@ import contextlib
 import logging
 import os
 from datetime import datetime
-from typing import TYPE_CHECKING
 
 import aiohttp
-
-if TYPE_CHECKING:
-    from scraper_interface import Release
 
 
 class GraphQLBackend:
@@ -293,12 +289,12 @@ class GraphQLBackend:
             logging.error(f"Error fetching latest releases: {e}")
             return []
 
-    async def get_latest_release(self) -> "Release | None":
+    async def get_latest_release(self) -> dict | None:
         """
         Get the latest UniFi Protect release using GraphQL API.
 
         Returns:
-            Latest Release object or None if not found
+            Dict with title, url, and tag keys, or None if not found
         """
         try:
             tags = self.get_configured_tags()
@@ -404,14 +400,12 @@ class GraphQLBackend:
                 logging.info("No releases found")
                 return None
 
-            # Return the latest release as Release object
             latest = releases[0]
-            from scraper_interface import Release
-
-            return Release(
-                title=f"{latest['title']} {latest['version']}",
-                url=f"https://community.ui.com/releases/{latest['slug']}/{latest['id']}",
-            )
+            return {
+                "title": f"{latest['title']} {latest['version']}",
+                "url": f"https://community.ui.com/releases/{latest['slug']}/{latest['id']}",
+                "tag": "",
+            }
 
         except aiohttp.ClientError as e:
             logging.error(f"Network error fetching releases: {e}")

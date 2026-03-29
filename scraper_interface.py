@@ -32,7 +32,10 @@ async def get_latest_release(session: aiohttp.ClientSession | None = None) -> Re
     """
     try:
         scraper = GraphQLBackend(session=session) if session else _backend
-        return await scraper.get_latest_release()
+        result = await scraper.get_latest_release()
+        if result is None:
+            return None
+        return Release(title=result["title"], url=result["url"], tag=result["tag"])
     except Exception as e:
         logging.error(f"Error fetching release: {e}")
         return None
