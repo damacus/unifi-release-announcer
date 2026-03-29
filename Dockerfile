@@ -27,9 +27,9 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Create a non-root user and set up cache directory
-RUN addgroup -S appgroup && \
-    adduser -S appuser -G appgroup && \
+# Create a non-root user with explicit UID/GID 1000 and set up cache directory
+RUN addgroup -S -g 1000 appgroup && \
+    adduser -S -u 1000 appuser -G appgroup && \
     mkdir /cache && \
     chown appuser:appgroup /cache
 
