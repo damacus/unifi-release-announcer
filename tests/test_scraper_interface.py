@@ -19,7 +19,7 @@ class TestScraperInterface(unittest.TestCase):
     @patch("scraper_interface._backend")
     def test_get_latest_release_success(self, mock_backend: AsyncMock) -> None:
         """Test get_latest_release returns release successfully."""
-        mock_backend.get_latest_release = AsyncMock(return_value=Release("Test Release", "https://test.com"))
+        mock_backend.get_latest_release = AsyncMock(return_value={"title": "Test Release", "url": "https://test.com", "tag": ""})
 
         result = asyncio.run(get_latest_release())
 
