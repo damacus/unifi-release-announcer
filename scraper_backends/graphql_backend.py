@@ -104,6 +104,15 @@ class GraphQLBackend:
             async with aiohttp.ClientSession() as session:
                 yield session
 
+    async def _make_graphql_request(self, payload: dict) -> dict:
+        """Execute a GraphQL request and return the parsed JSON response."""
+        async with self._get_session() as session:
+            async with session.post(
+                self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)
+            ) as response:
+                response.raise_for_status()
+                return await response.json()
+
     def get_allowed_tags(self) -> list[str]:
         """Get the list of all allowed tags."""
         return self.ALLOWED_TAGS.copy()
@@ -160,14 +169,9 @@ class GraphQLBackend:
             release_title = release_data.get("title", "").lower()
 
             # Check if this release should be filtered out
-            should_skip = False
-            for pattern in self.UNWANTED_PATTERNS:
-                if pattern in release_title:
-                    should_skip = True
-                    logging.debug(f"Filtering out release '{release_data.get('title')}' due to pattern '{pattern}'")
-                    break
-
-            if should_skip:
+            matched_pattern = next((p for p in self.UNWANTED_PATTERNS if p in release_title), None)
+            if matched_pattern:
+                logging.debug("Filtering out release '%s' due to pattern '%s'", release_data.get("title"), matched_pattern)
                 continue
 
             # Find which of our configured tags this release belongs to
@@ -260,12 +264,7 @@ class GraphQLBackend:
 
             payload = self._build_latest_releases_payload(tags)
 
-            async with self._get_session() as session:
-                async with session.post(
-                    self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)
-                ) as response:
-                    response.raise_for_status()
-                    data = await response.json()
+            data = await self._make_graphql_request(payload)
 
             all_releases = data.get("data", {}).get("releases", {}).get("items", [])
 
@@ -383,12 +382,7 @@ class GraphQLBackend:
 
             logging.info("Fetching latest UniFi Protect release")
 
-            async with self._get_session() as session:
-                async with session.post(
-                    self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)
-                ) as response:
-                    response.raise_for_status()
-                    data = await response.json()
+            data = await self._make_graphql_request(payload)
 
             if "errors" in data:
                 logging.error(f"GraphQL errors: {data['errors']}")
@@ -475,12 +469,7 @@ class GraphQLBackend:
 
             payload = {"query": query, "variables": {"id": release_id}, "operationName": "ReleaseDetailQuery"}
 
-            async with self._get_session() as session:
-                async with session.post(
-                    self.api_url, headers=self.headers, json=payload, timeout=aiohttp.ClientTimeout(total=30)
-                ) as response:
-                    response.raise_for_status()
-                    data = await response.json()
+            data = await self._make_graphql_request(payload)
 
             if "errors" in data:
                 logging.error(f"GraphQL errors: {data['errors']}")
