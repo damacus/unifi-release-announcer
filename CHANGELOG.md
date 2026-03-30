@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.7](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.6...unifi-release-announcer-v0.2.7) (2026-03-30)
+
+
+### Miscellaneous
+
+* **deps:** update mcr.microsoft.com/devcontainers/python:dev-3.13-trixie docker digest to 194f617 ([#162](https://github.com/damacus/unifi-release-announcer/issues/162)) ([77ef9cd](https://github.com/damacus/unifi-release-announcer/commit/77ef9cd571889b7b92a399b371264885ce38a6ed))
+
 ## [0.2.6](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.5...unifi-release-announcer-v0.2.6) (2026-03-29)
 
 
