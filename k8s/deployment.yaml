@@ -31,9 +31,3 @@ spec:
               drop: ["ALL"]
             seccompProfile:
               type: RuntimeDefault
-          volumeMounts:
-            - name: cache
-              mountPath: /cache
-      volumes:
-        - name: cache
-          emptyDir: {}
