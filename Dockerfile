@@ -27,11 +27,9 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Create a non-root user with explicit UID/GID 1000 and set up cache directory
+# Create a non-root user with explicit UID/GID 1000
 RUN addgroup -S -g 1000 appgroup && \
-    adduser -S -u 1000 appuser -G appgroup && \
-    mkdir /cache && \
-    chown appuser:appgroup /cache
+    adduser -S -u 1000 appuser -G appgroup
 
 # Copy virtual environment from builder
 COPY --from=builder --chown=appuser:appgroup /app/.venv /app/.venv
@@ -43,7 +41,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY --chown=appuser:appgroup scraper_backends/ /app/scraper_backends/
 COPY --chown=appuser:appgroup main.py /app/main.py
 COPY --chown=appuser:appgroup scraper_interface.py /app/scraper_interface.py
-COPY --chown=appuser:appgroup state_manager.py /app/state_manager.py
 
 # Switch to non-root user
 USER appuser

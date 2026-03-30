@@ -7,7 +7,6 @@ import discord
 from discord.ext import tasks
 
 from scraper_interface import Release, get_latest_releases
-from state_manager import StateManager
 
 # --- Configuration ---
 logging.basicConfig(
@@ -18,8 +17,7 @@ logging.basicConfig(
 
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 DISCORD_CHANNEL_ID = os.getenv("DISCORD_CHANNEL_ID")
-STATE_FILE = "/cache/release_state.json"
-state_manager = StateManager(STATE_FILE)
+HISTORY_SEARCH_LIMIT = 200
 
 
 # --- Bot Setup ---
@@ -58,7 +56,36 @@ def format_release_message(release: Release) -> str:
     return f"🎉 **New UniFi Release Posted**\n\n🔗 [{title}]({url}) {platform_emoji}"
 
 
-# State management is now handled by StateManager class
+async def has_announced_url(
+    channel: discord.TextChannel | discord.ForumChannel | discord.abc.GuildChannel,
+    url: str,
+) -> bool:
+    """Check Discord channel history to see if a URL has already been announced."""
+    try:
+        if isinstance(channel, discord.ForumChannel):
+            for thread in channel.threads:
+                async for message in thread.history(limit=1):
+                    if url in message.content:
+                        return True
+            async for thread in channel.archived_threads(limit=50):
+                async for message in thread.history(limit=1):
+                    if url in message.content:
+                        return True
+            return False
+        elif hasattr(channel, "history"):
+            async for message in channel.history(limit=HISTORY_SEARCH_LIMIT):
+                if url in message.content:
+                    return True
+            return False
+        else:
+            logging.warning(
+                "Channel type %s does not support history(); treating URL as unseen.",
+                type(channel).__name__,
+            )
+            return False
+    except discord.HTTPException as e:
+        logging.warning("Failed to fetch channel history: %s — treating URL as unseen.", e)
+        return False
 
 
 async def _post_to_forum(channel: discord.ForumChannel, release: Release, message: str) -> None:
@@ -100,26 +127,18 @@ async def _post_to_generic_channel(
 # --- Core Logic ---
 
 
-async def process_new_release(latest_release: Release, state_manager: StateManager) -> None:
+async def process_new_release(latest_release: Release) -> None:
     """Processes a new release by sending a Discord notification."""
-    logging.info(f"New release found: {latest_release.title} (tag: {latest_release.tag})")
-
-    if not DISCORD_CHANNEL_ID:
-        logging.error("DISCORD_CHANNEL_ID is not set; cannot post.")
-        return
-
-    try:
-        channel_id = int(DISCORD_CHANNEL_ID)
-    except ValueError:
-        logging.error(f"Invalid DISCORD_CHANNEL_ID: {DISCORD_CHANNEL_ID}")
-        return
-
-    channel = client.get_channel(channel_id)
-    if not channel:
-        logging.error(f"Could not find channel with ID {DISCORD_CHANNEL_ID}")
-        return
+    logging.info("New release found: %s (tag: %s)", latest_release.title, latest_release.tag)
 
     message = format_release_message(latest_release)
+
+    # channel is resolved by the caller; retrieve it here for posting
+    channel_id = int(DISCORD_CHANNEL_ID)  # type: ignore[arg-type]
+    channel = client.get_channel(channel_id)
+    if not channel:
+        logging.error("Could not find channel with ID %s", DISCORD_CHANNEL_ID)
+        return
 
     try:
         if isinstance(channel, discord.ForumChannel):
@@ -127,11 +146,7 @@ async def process_new_release(latest_release: Release, state_manager: StateManag
         elif isinstance(channel, discord.TextChannel):
             await _post_to_text_channel(channel, message)
         else:
-            success = await _post_to_generic_channel(channel, message)
-            if not success:
-                return  # Stop if we can't post
-
-        await state_manager.set_last_url(latest_release.tag, latest_release.url)
+            await _post_to_generic_channel(channel, message)
 
     except discord.Forbidden:
         logging.error(
@@ -149,7 +164,7 @@ async def process_new_release(latest_release: Release, state_manager: StateManag
 async def on_ready() -> None:
     """Called when the bot successfully logs in."""
     if client.user:
-        logging.info(f"Logged in as {client.user.name} ({client.user.id})")
+        logging.info("Logged in as %s (%s)", client.user.name, client.user.id)
     else:
         logging.info("Logged in, but user details not available yet.")
     check_for_updates.start()
@@ -161,16 +176,31 @@ async def check_for_updates() -> None:
     """Periodically checks for new releases and posts them."""
     logging.info("Checking for new UniFi releases...")
 
+    if not DISCORD_CHANNEL_ID:
+        logging.error("DISCORD_CHANNEL_ID is not set.")
+        return
+
+    try:
+        channel_id = int(DISCORD_CHANNEL_ID)
+    except ValueError:
+        logging.error("Invalid DISCORD_CHANNEL_ID: %s", DISCORD_CHANNEL_ID)
+        return
+
+    channel = client.get_channel(channel_id)
+    if not channel:
+        logging.error("Could not find channel with ID %s", DISCORD_CHANNEL_ID)
+        return
+
     latest_releases = await get_latest_releases(session=client.session)
 
     if not latest_releases:
-        logging.info("No new releases found or failed to fetch.")
+        logging.info("No releases found from scraper.")
         return
 
     new_releases_found = False
     for release in latest_releases:
-        if not state_manager.has_seen_url(release.tag, release.url):
-            await process_new_release(release, state_manager)
+        if not await has_announced_url(channel, release.url):
+            await process_new_release(release)
             new_releases_found = True
 
     if not new_releases_found:
@@ -203,5 +233,5 @@ if __name__ == "__main__":
         logging.critical("Authentication failed: Invalid Discord Bot Token.")
         sys.exit(1)
     except Exception as e:
-        logging.critical(f"Failed to start the bot: {e}")
+        logging.critical("Failed to start the bot: %s", e)
         sys.exit(1)

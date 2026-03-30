@@ -8,8 +8,6 @@ services:
       - SCRAPER_BACKEND=${SCRAPER_BACKEND:-graphql}
       - TAGS=${TAGS:-unifi-protect,unifi-network}
     env_file: [.env]
-    volumes:
-      - ./cache:/cache
 
   dev:
     build:
