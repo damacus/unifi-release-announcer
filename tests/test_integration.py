@@ -1,39 +1,61 @@
-"""
-Integration test to verify the modular scraper works with main.py
-"""
+"""Integration tests for the full announcement pipeline (fully mocked, no network calls)."""
 
-import asyncio
-import logging
+import unittest
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from scraper_interface import get_latest_release
+import discord
 
-# Setup logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-
-
-def test_integration() -> None:
-    """Synchronous wrapper for pytest compatibility."""
-    asyncio.run(_test_integration_async())
+import main
+from main import check_for_updates
+from scraper_interface import Release
 
 
-async def _test_integration_async() -> None:
-    logging.info("🧪 Testing GraphQL Scraper")
-    logging.info("=" * 30)
+class TestBotPipeline(unittest.IsolatedAsyncioTestCase):
+    """End-to-end pipeline tests: scraper → deduplication → Discord post."""
 
-    # Test GraphQL backend
-    logging.info("📡 Testing GraphQL backend...")
-    release = await get_latest_release()
+    def _make_release(self) -> Release:
+        return Release(
+            title="UniFi Network 8.0.28 (GA)",
+            url="https://community.ui.com/releases/network-8-0-28/abc123",
+            tag="unifi-network",
+        )
 
-    if release:
-        logging.info("✅ GraphQL test successful!")
-        logging.info(f"📋 Title: {release.title}")
-        logging.info(f"🔗 URL: {release.url}")
-    else:
-        logging.warning("⚠️  GraphQL returned no results")
+    @patch("main.DISCORD_CHANNEL_ID", "999")
+    @patch("main.get_latest_releases", new_callable=AsyncMock)
+    @patch("main.has_announced_url", new_callable=AsyncMock)
+    async def test_full_pipeline_new_release_gets_posted(self, mock_announced, mock_get_releases) -> None:
+        """A new, unseen release should result in a Discord message being sent."""
+        release = self._make_release()
+        mock_get_releases.return_value = [release]
+        mock_announced.return_value = False
 
-    logging.info("")
-    logging.info("🎯 Integration test complete!")
+        mock_channel = AsyncMock(spec=discord.TextChannel)
+        mock_channel.name = "releases"
+
+        with patch.object(main.client, "get_channel", return_value=mock_channel):
+            await check_for_updates.coro()
+
+        mock_channel.send.assert_awaited_once()
+        sent_message = mock_channel.send.call_args[0][0]
+        self.assertIn(release.title, sent_message)
+        self.assertIn(release.url, sent_message)
+
+    @patch("main.DISCORD_CHANNEL_ID", "999")
+    @patch("main.get_latest_releases", new_callable=AsyncMock)
+    @patch("main.has_announced_url", new_callable=AsyncMock)
+    async def test_full_pipeline_already_announced_not_reposted(self, mock_announced, mock_get_releases) -> None:
+        """A release that was already announced should not be posted again."""
+        release = self._make_release()
+        mock_get_releases.return_value = [release]
+        mock_announced.return_value = True
+
+        mock_channel = AsyncMock(spec=discord.TextChannel)
+
+        with patch.object(main.client, "get_channel", return_value=mock_channel):
+            await check_for_updates.coro()
+
+        mock_channel.send.assert_not_awaited()
 
 
 if __name__ == "__main__":
-    asyncio.run(_test_integration_async())
+    unittest.main()

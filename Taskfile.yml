@@ -98,6 +98,16 @@ tasks:
     cmds:
       - echo "✅ Pre-commit checks completed!"
 
+  mutate:
+    desc: Run mutation testing
+    cmds:
+      - "{{.PYTHON}} -m mutmut run"
+
+  mutate-results:
+    desc: Show mutation testing results
+    cmds:
+      - "{{.PYTHON}} -m mutmut results"
+
   docs-serve:
     desc: Serve documentation locally
     cmds:
