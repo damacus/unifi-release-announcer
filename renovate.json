@@ -1,6 +1,33 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>damacus/renovate-config"
+    "local>damacus/renovate-config",
+    "local>damacus/renovate-config:autoMergeGitHubActions"
+  ],
+  "packageRules": [
+    {
+      "description": "Auto-merge development tooling updates",
+      "matchFileNames": [
+        "pyproject.toml",
+        "uv.lock"
+      ],
+      "matchPackageNames": [
+        "mkdocs",
+        "mkdocs-material",
+        "mypy",
+        "mutmut",
+        "pytest",
+        "pytest-asyncio",
+        "pytest-cov",
+        "respx",
+        "ruff"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true,
+      "automergeType": "pr"
+    }
   ]
 }
