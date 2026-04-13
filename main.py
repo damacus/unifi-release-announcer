@@ -56,36 +56,30 @@ def format_release_message(release: Release) -> str:
     return f"🎉 **New UniFi Release Posted**\n\n🔗 [{title}]({url}) {platform_emoji}"
 
 
-async def has_announced_url(
+async def get_announced_message_contents(
     channel: discord.TextChannel | discord.ForumChannel | discord.abc.GuildChannel,
-    url: str,
-) -> bool:
-    """Check Discord channel history to see if a URL has already been announced."""
+) -> set[str]:
+    """Fetches recent message contents to cache channel history efficiently."""
+    contents: set[str] = set()
     try:
         if isinstance(channel, discord.ForumChannel):
             for thread in channel.threads:
                 async for message in thread.history(limit=1):
-                    if url in message.content:
-                        return True
+                    contents.add(message.content)
             async for thread in channel.archived_threads(limit=50):
                 async for message in thread.history(limit=1):
-                    if url in message.content:
-                        return True
-            return False
+                    contents.add(message.content)
         elif hasattr(channel, "history"):
             async for message in channel.history(limit=HISTORY_SEARCH_LIMIT):
-                if url in message.content:
-                    return True
-            return False
+                contents.add(message.content)
         else:
             logging.warning(
-                "Channel type %s does not support history(); treating URL as unseen.",
+                "Channel type %s does not support history(); skipping fetch.",
                 type(channel).__name__,
             )
-            return False
     except discord.HTTPException as e:
-        logging.warning("Failed to fetch channel history: %s — treating URL as unseen.", e)
-        return False
+        logging.warning("Failed to fetch channel history: %s — treating as empty.", e)
+    return contents
 
 
 async def _post_to_forum(channel: discord.ForumChannel, release: Release, message: str) -> None:
@@ -197,9 +191,17 @@ async def check_for_updates() -> None:
         logging.info("No releases found from scraper.")
         return
 
+    announced_contents = await get_announced_message_contents(channel)
+
     new_releases_found = False
     for release in latest_releases:
-        if not await has_announced_url(channel, release.url):
+        is_announced = False
+        for content in announced_contents:
+            if release.url in content:
+                is_announced = True
+                break
+
+        if not is_announced:
             await process_new_release(release)
             new_releases_found = True
 

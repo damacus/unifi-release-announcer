@@ -171,7 +171,9 @@ class GraphQLBackend:
             # Check if this release should be filtered out
             matched_pattern = next((p for p in self.UNWANTED_PATTERNS if p in release_title), None)
             if matched_pattern:
-                logging.debug("Filtering out release '%s' due to pattern '%s'", release_data.get("title"), matched_pattern)
+                logging.debug(
+                    "Filtering out release '%s' due to pattern '%s'", release_data.get("title"), matched_pattern
+                )
                 continue
 
             # Find which of our configured tags this release belongs to

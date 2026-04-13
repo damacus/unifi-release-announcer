@@ -1,7 +1,7 @@
 """Integration tests for the full announcement pipeline (fully mocked, no network calls)."""
 
 import unittest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import discord
 
@@ -22,12 +22,12 @@ class TestBotPipeline(unittest.IsolatedAsyncioTestCase):
 
     @patch("main.DISCORD_CHANNEL_ID", "999")
     @patch("main.get_latest_releases", new_callable=AsyncMock)
-    @patch("main.has_announced_url", new_callable=AsyncMock)
+    @patch("main.get_announced_message_contents", new_callable=AsyncMock)
     async def test_full_pipeline_new_release_gets_posted(self, mock_announced, mock_get_releases) -> None:
         """A new, unseen release should result in a Discord message being sent."""
         release = self._make_release()
         mock_get_releases.return_value = [release]
-        mock_announced.return_value = False
+        mock_announced.return_value = set()
 
         mock_channel = AsyncMock(spec=discord.TextChannel)
         mock_channel.name = "releases"
@@ -42,12 +42,12 @@ class TestBotPipeline(unittest.IsolatedAsyncioTestCase):
 
     @patch("main.DISCORD_CHANNEL_ID", "999")
     @patch("main.get_latest_releases", new_callable=AsyncMock)
-    @patch("main.has_announced_url", new_callable=AsyncMock)
+    @patch("main.get_announced_message_contents", new_callable=AsyncMock)
     async def test_full_pipeline_already_announced_not_reposted(self, mock_announced, mock_get_releases) -> None:
         """A release that was already announced should not be posted again."""
         release = self._make_release()
         mock_get_releases.return_value = [release]
-        mock_announced.return_value = True
+        mock_announced.return_value = {release.url}
 
         mock_channel = AsyncMock(spec=discord.TextChannel)
 
