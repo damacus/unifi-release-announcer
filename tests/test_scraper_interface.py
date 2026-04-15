@@ -19,7 +19,9 @@ class TestScraperInterface(unittest.TestCase):
     @patch("scraper_interface._backend")
     def test_get_latest_release_success(self, mock_backend: AsyncMock) -> None:
         """Test get_latest_release returns release successfully."""
-        mock_backend.get_latest_release = AsyncMock(return_value={"title": "Test Release", "url": "https://test.com", "tag": ""})
+        mock_backend.get_latest_release = AsyncMock(
+            return_value={"title": "Test Release", "url": "https://test.com", "tag": ""}
+        )
 
         result = asyncio.run(get_latest_release())
 
@@ -41,9 +43,11 @@ class TestScraperInterface(unittest.TestCase):
     @patch("scraper_interface._backend")
     def test_get_latest_releases_returns_list(self, mock_backend) -> None:
         """Test get_latest_releases returns a list of Release objects."""
-        mock_backend.get_latest_releases = AsyncMock(return_value=[
-            {"title": "T1", "url": "https://u.com/1", "tag": "unifi-protect"},
-        ])
+        mock_backend.get_latest_releases = AsyncMock(
+            return_value=[
+                {"title": "T1", "url": "https://u.com/1", "tag": "unifi-protect"},
+            ]
+        )
 
         result = asyncio.run(get_latest_releases())
 

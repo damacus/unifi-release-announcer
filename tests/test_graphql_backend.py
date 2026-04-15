@@ -513,7 +513,7 @@ class TestGraphQLBackendDetails(TestGraphQLBackendBase):
     @patch("aiohttp.ClientSession")
     def test_get_release_details_missing_data(self, mock_session_cls) -> None:
         """Test handling of missing data key in response."""
-        response_data = {}  # Empty response
+        response_data: dict[str, dict[str, str]] = {}  # Empty response
         self._setup_mock(mock_session_cls, response_data)
 
         backend = GraphQLBackend()

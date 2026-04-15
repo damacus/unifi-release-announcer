@@ -12,7 +12,7 @@ from main import (
     _post_to_text_channel,
     check_for_updates,
     format_release_message,
-    has_announced_url,
+    get_announced_message_contents,
     process_new_release,
 )
 from scraper_interface import Release
@@ -74,14 +74,16 @@ class TestMain(unittest.TestCase):
 
 def _make_async_iter(items):
     """Return an object that supports 'async for' over the given items."""
+
     async def _aiter():
         for item in items:
             yield item
+
     return _aiter()
 
 
-class TestHasAnnouncedUrl(unittest.IsolatedAsyncioTestCase):
-    """Test suite for has_announced_url()."""
+class TestGetAnnouncedMessageContents(unittest.IsolatedAsyncioTestCase):
+    """Test suite for get_announced_message_contents()."""
 
     TARGET_URL = "https://community.ui.com/releases/unifi-protect/abc123"
 
@@ -92,71 +94,55 @@ class TestHasAnnouncedUrl(unittest.IsolatedAsyncioTestCase):
 
     # --- TextChannel tests ---
 
-    async def test_empty_text_channel_returns_false(self) -> None:
+    async def test_empty_text_channel_returns_empty_set(self) -> None:
         channel = MagicMock(spec=discord.TextChannel)
         channel.history = MagicMock(return_value=_make_async_iter([]))
-        result = await has_announced_url(channel, self.TARGET_URL)
-        self.assertFalse(result)
+        result = await get_announced_message_contents(channel)
+        self.assertEqual(result, set())
 
-    async def test_text_channel_url_found_returns_true(self) -> None:
+    async def test_text_channel_returns_contents(self) -> None:
         channel = MagicMock(spec=discord.TextChannel)
-        msg = self._make_message(f"🎉 Release posted\n🔗 [{self.TARGET_URL}]({self.TARGET_URL})")
+        content_str = f"🎉 Release posted\n🔗 [{self.TARGET_URL}]({self.TARGET_URL})"
+        msg = self._make_message(content_str)
         channel.history = MagicMock(return_value=_make_async_iter([msg]))
-        result = await has_announced_url(channel, self.TARGET_URL)
-        self.assertTrue(result)
-
-    async def test_text_channel_url_not_in_history_returns_false(self) -> None:
-        channel = MagicMock(spec=discord.TextChannel)
-        msg = self._make_message("https://community.ui.com/releases/other/xyz")
-        channel.history = MagicMock(return_value=_make_async_iter([msg]))
-        result = await has_announced_url(channel, self.TARGET_URL)
-        self.assertFalse(result)
+        result = await get_announced_message_contents(channel)
+        self.assertEqual(result, {content_str})
 
     # --- ForumChannel tests ---
 
-    async def test_forum_channel_active_thread_url_found(self) -> None:
+    async def test_forum_channel_active_thread_returns_contents(self) -> None:
         channel = MagicMock(spec=discord.ForumChannel)
         thread = MagicMock(spec=discord.Thread)
         msg = self._make_message(self.TARGET_URL)
         thread.history = MagicMock(return_value=_make_async_iter([msg]))
         channel.threads = [thread]
         channel.archived_threads = MagicMock(return_value=_make_async_iter([]))
-        result = await has_announced_url(channel, self.TARGET_URL)
-        self.assertTrue(result)
+        result = await get_announced_message_contents(channel)
+        self.assertEqual(result, {self.TARGET_URL})
 
-    async def test_forum_channel_archived_thread_url_found(self) -> None:
+    async def test_forum_channel_archived_thread_returns_contents(self) -> None:
         channel = MagicMock(spec=discord.ForumChannel)
         channel.threads = []
         archived_thread = MagicMock(spec=discord.Thread)
         msg = self._make_message(self.TARGET_URL)
         archived_thread.history = MagicMock(return_value=_make_async_iter([msg]))
         channel.archived_threads = MagicMock(return_value=_make_async_iter([archived_thread]))
-        result = await has_announced_url(channel, self.TARGET_URL)
-        self.assertTrue(result)
-
-    async def test_forum_channel_no_match_returns_false(self) -> None:
-        channel = MagicMock(spec=discord.ForumChannel)
-        thread = MagicMock(spec=discord.Thread)
-        msg = self._make_message("https://community.ui.com/releases/other/xyz")
-        thread.history = MagicMock(return_value=_make_async_iter([msg]))
-        channel.threads = [thread]
-        channel.archived_threads = MagicMock(return_value=_make_async_iter([]))
-        result = await has_announced_url(channel, self.TARGET_URL)
-        self.assertFalse(result)
+        result = await get_announced_message_contents(channel)
+        self.assertEqual(result, {self.TARGET_URL})
 
     # --- Error / edge-case tests ---
 
-    async def test_http_exception_returns_false(self) -> None:
+    async def test_http_exception_returns_empty_set(self) -> None:
         channel = MagicMock(spec=discord.TextChannel)
         channel.history = MagicMock(side_effect=discord.HTTPException(MagicMock(), "error"))
-        result = await has_announced_url(channel, self.TARGET_URL)
-        self.assertFalse(result)
+        result = await get_announced_message_contents(channel)
+        self.assertEqual(result, set())
 
-    async def test_channel_without_history_returns_false(self) -> None:
+    async def test_channel_without_history_returns_empty_set(self) -> None:
         channel = MagicMock(spec=[])  # no attributes at all
         del channel.history  # ensure hasattr returns False
-        result = await has_announced_url(channel, self.TARGET_URL)
-        self.assertFalse(result)
+        result = await get_announced_message_contents(channel)
+        self.assertEqual(result, set())
 
 
 class TestPostingHelpers(unittest.IsolatedAsyncioTestCase):
@@ -298,12 +284,12 @@ class TestCheckForUpdates(unittest.IsolatedAsyncioTestCase):
 
     @patch("main.DISCORD_CHANNEL_ID", "123")
     @patch("main.process_new_release", new_callable=AsyncMock)
-    @patch("main.has_announced_url", new_callable=AsyncMock)
+    @patch("main.get_announced_message_contents", new_callable=AsyncMock)
     @patch("main.get_latest_releases", new_callable=AsyncMock)
-    async def test_posts_new_release(self, mock_get_releases, mock_announced, mock_process) -> None:
+    async def test_posts_new_release(self, mock_get_releases, mock_announced_contents, mock_process) -> None:
         release = Release(title="UniFi Network 8.0.28", url="https://example.com/1")
         mock_get_releases.return_value = [release]
-        mock_announced.return_value = False
+        mock_announced_contents.return_value = set()
         channel = MagicMock(spec=discord.TextChannel)
         with patch.object(main.client, "get_channel", return_value=channel):
             await check_for_updates.coro()
@@ -311,12 +297,14 @@ class TestCheckForUpdates(unittest.IsolatedAsyncioTestCase):
 
     @patch("main.DISCORD_CHANNEL_ID", "123")
     @patch("main.process_new_release", new_callable=AsyncMock)
-    @patch("main.has_announced_url", new_callable=AsyncMock)
+    @patch("main.get_announced_message_contents", new_callable=AsyncMock)
     @patch("main.get_latest_releases", new_callable=AsyncMock)
-    async def test_skips_already_announced_release(self, mock_get_releases, mock_announced, mock_process) -> None:
+    async def test_skips_already_announced_release(
+        self, mock_get_releases, mock_announced_contents, mock_process
+    ) -> None:
         release = Release(title="UniFi Network 8.0.28", url="https://example.com/1")
         mock_get_releases.return_value = [release]
-        mock_announced.return_value = True
+        mock_announced_contents.return_value = {f"Link: {release.url}"}
         channel = MagicMock(spec=discord.TextChannel)
         with patch.object(main.client, "get_channel", return_value=channel):
             await check_for_updates.coro()
@@ -324,16 +312,18 @@ class TestCheckForUpdates(unittest.IsolatedAsyncioTestCase):
 
     @patch("main.DISCORD_CHANNEL_ID", "123")
     @patch("main.process_new_release", new_callable=AsyncMock)
-    @patch("main.has_announced_url", new_callable=AsyncMock)
+    @patch("main.get_announced_message_contents", new_callable=AsyncMock)
     @patch("main.get_latest_releases", new_callable=AsyncMock)
-    async def test_posts_only_unannounced_in_mixed_batch(self, mock_get_releases, mock_announced, mock_process) -> None:
+    async def test_posts_only_unannounced_in_mixed_batch(
+        self, mock_get_releases, mock_announced_contents, mock_process
+    ) -> None:
         releases = [
             Release(title="Release A", url="https://example.com/a"),
             Release(title="Release B", url="https://example.com/b"),
             Release(title="Release C", url="https://example.com/c"),
         ]
         mock_get_releases.return_value = releases
-        mock_announced.side_effect = [False, True, False]
+        mock_announced_contents.return_value = {"Link: https://example.com/b"}
         channel = MagicMock(spec=discord.TextChannel)
         with patch.object(main.client, "get_channel", return_value=channel):
             await check_for_updates.coro()
