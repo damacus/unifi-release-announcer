@@ -68,14 +68,33 @@ class GraphQLBackend:
 
     _ALLOWED_TAGS_SET = frozenset(ALLOWED_TAGS)
 
-    # Pre-compiled unwanted patterns to avoid re-allocating on every release
+    # Per-tag allow-list: when a tag is mapped here, only releases whose title
+    # contains ALL of these substrings (case-insensitive) are announced.
+    # The community API tags accessory firmware (Viewport, Cameras, AI Port,
+    # AI Key, AI Horn Speaker, SuperLink, sensors, NVR, etc.) under the same
+    # tag as the main software, so a deny-list is fragile — every new accessory
+    # name has to be added. Requiring "Application" in the title keeps just the
+    # main software release for each product line.
+    TAG_TITLE_INCLUDES: dict[str, tuple[str, ...]] = {
+        "unifi-protect": ("protect", "application"),
+        "unifi-network": ("network", "application"),
+        "unifi-access": ("access", "application"),
+        "unifi-talk": ("talk", "application"),
+        "unifi-drive": ("drive", "application"),
+        "unifi-connect": ("connect", "application"),
+        "unifi-portal": ("portal", "application"),
+    }
+
+    # Fallback deny-list used for tags that don't have an explicit allow-list.
     UNWANTED_PATTERNS = (
         "android",
         "ios",
         "iphone",
         "ipad",
+        "tvos",
         "sfp wizard",
         "ups",
+        "advisory",
     )
 
     def __init__(self, session: aiohttp.ClientSession | None = None) -> None:
@@ -161,32 +180,36 @@ class GraphQLBackend:
             "tag": tag,
         }
 
+    def _is_release_allowed_for_tag(self, release_title: str, tag: str) -> bool:
+        """Return True if release_title (lowercase) is an announceable release for tag.
+
+        Tags with an entry in TAG_TITLE_INCLUDES use a positive allow-list:
+        every required substring must appear in the title. Other tags fall
+        back to the UNWANTED_PATTERNS deny-list.
+        """
+        required = self.TAG_TITLE_INCLUDES.get(tag)
+        if required is not None:
+            return all(token in release_title for token in required)
+        return not any(p in release_title for p in self.UNWANTED_PATTERNS)
+
     def _process_releases_response(self, all_releases: list[dict], tags: list[str]) -> dict[str, dict]:
         """Filter and group releases by tag, returning the latest for each."""
-        releases_by_tag = {}
+        releases_by_tag: dict[str, dict] = {}
         for release_data in all_releases:
             release_tags = release_data.get("tags", [])
             release_title = release_data.get("title", "").lower()
 
-            # Check if this release should be filtered out
-            matched_pattern = next((p for p in self.UNWANTED_PATTERNS if p in release_title), None)
-            if matched_pattern:
-                logging.debug(
-                    "Filtering out release '%s' due to pattern '%s'", release_data.get("title"), matched_pattern
-                )
-                continue
-
-            # Find which of our configured tags this release belongs to
             for tag in tags:
-                if tag in release_tags:
-                    if tag not in releases_by_tag:
-                        releases_by_tag[tag] = release_data
-                    else:
-                        # Keep the most recent (releases are sorted by createdAt DESC)
-                        current_date = releases_by_tag[tag]["createdAt"]
-                        new_date = release_data["createdAt"]
-                        if new_date > current_date:
-                            releases_by_tag[tag] = release_data
+                if tag not in release_tags:
+                    continue
+                if not self._is_release_allowed_for_tag(release_title, tag):
+                    logging.debug(
+                        "Filtering out release '%s' for tag '%s'", release_data.get("title"), tag
+                    )
+                    continue
+                existing = releases_by_tag.get(tag)
+                if existing is None or release_data["createdAt"] > existing["createdAt"]:
+                    releases_by_tag[tag] = release_data
 
         return releases_by_tag
 
