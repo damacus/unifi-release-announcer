@@ -123,7 +123,7 @@ class TestGraphQLBackendTags(TestGraphQLBackendBase):
                     "items": [
                         {
                             "id": "123",
-                            "title": "Network Release",
+                            "title": "UniFi Network Application",
                             "version": "1.0.0",
                             "slug": "network-release",
                             "tags": ["unifi-network"],
@@ -131,7 +131,7 @@ class TestGraphQLBackendTags(TestGraphQLBackendBase):
                         },
                         {
                             "id": "456",
-                            "title": "Protect Release",
+                            "title": "UniFi Protect Application",
                             "version": "2.0.0",
                             "slug": "protect-release",
                             "tags": ["unifi-protect"],
@@ -234,7 +234,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
             },
             {
                 "id": "456",
-                "title": "UniFi Network",
+                "title": "UniFi Network Application",
                 "version": "2.0.0",
                 "slug": "network-base",
                 "tags": ["unifi-network"],
@@ -250,7 +250,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
 
         # Should only return the base network release, not Android
         self.assertEqual(len(results), 1)
-        self.assertIn("UniFi Network 2.0.0", results[0]["title"])
+        self.assertIn("UniFi Network Application 2.0.0", results[0]["title"])
         self.assertNotIn("Android", results[0]["title"])
 
     @patch("aiohttp.ClientSession")
@@ -283,7 +283,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
             },
             {
                 "id": "101",
-                "title": "UniFi Network",
+                "title": "UniFi Network Application",
                 "version": "2.0.0",
                 "slug": "network-base",
                 "tags": ["unifi-network"],
@@ -299,7 +299,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
 
         # Should only return the base network release
         self.assertEqual(len(results), 1)
-        self.assertIn("UniFi Network 2.0.0", results[0]["title"])
+        self.assertIn("UniFi Network Application 2.0.0", results[0]["title"])
 
     @patch("aiohttp.ClientSession")
     def test_filters_mobile_releases_from_all_tags(self, mock_session_cls: MagicMock) -> None:
@@ -315,7 +315,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
             },
             {
                 "id": "456",
-                "title": "UniFi Protect",
+                "title": "UniFi Protect Application",
                 "version": "2.0.0",
                 "slug": "protect-base",
                 "tags": ["unifi-protect"],
@@ -331,7 +331,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
 
         # Should return only the base protect release, not Android
         self.assertEqual(len(results), 1)
-        self.assertIn("UniFi Protect 2.0.0", results[0]["title"])
+        self.assertIn("UniFi Protect Application 2.0.0", results[0]["title"])
         self.assertNotIn("Android", results[0]["title"])
 
     @patch("aiohttp.ClientSession")
@@ -340,7 +340,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
         releases_data = [
             {
                 "id": "123",
-                "title": "UniFi Network",
+                "title": "UniFi Network Application",
                 "version": "8.0.28",
                 "slug": "network-stable",
                 "tags": ["unifi-network"],
@@ -356,7 +356,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
 
         self.assertEqual(len(results), 1)
         self.assertIn("(GA)", results[0]["title"])
-        self.assertEqual(results[0]["title"], "UniFi Network 8.0.28 (GA)")
+        self.assertEqual(results[0]["title"], "UniFi Network Application 8.0.28 (GA)")
 
     @patch("aiohttp.ClientSession")
     def test_adds_beta_status_to_beta_releases(self, mock_session_cls: MagicMock) -> None:
@@ -364,7 +364,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
         releases_data = [
             {
                 "id": "123",
-                "title": "UniFi Network",
+                "title": "UniFi Network Application",
                 "version": "8.1.0-beta.1",
                 "slug": "network-beta",
                 "tags": ["unifi-network"],
@@ -380,7 +380,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
 
         self.assertEqual(len(results), 1)
         self.assertIn("(Beta)", results[0]["title"])
-        self.assertEqual(results[0]["title"], "UniFi Network 8.1.0-beta.1 (Beta)")
+        self.assertEqual(results[0]["title"], "UniFi Network Application 8.1.0-beta.1 (Beta)")
 
     @patch("aiohttp.ClientSession")
     def test_adds_beta_status_to_rc_releases(self, mock_session_cls: MagicMock) -> None:
@@ -388,7 +388,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
         releases_data = [
             {
                 "id": "123",
-                "title": "UniFi Network",
+                "title": "UniFi Network Application",
                 "version": "8.1.0-rc.1",
                 "slug": "network-rc",
                 "tags": ["unifi-network"],
@@ -404,7 +404,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
 
         self.assertEqual(len(results), 1)
         self.assertIn("(Beta)", results[0]["title"])
-        self.assertEqual(results[0]["title"], "UniFi Network 8.1.0-rc.1 (Beta)")
+        self.assertEqual(results[0]["title"], "UniFi Network Application 8.1.0-rc.1 (Beta)")
 
     @patch("aiohttp.ClientSession")
     def test_detects_beta_in_title(self, mock_session_cls: MagicMock) -> None:
@@ -412,7 +412,7 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
         releases_data = [
             {
                 "id": "123",
-                "title": "UniFi Network Beta",
+                "title": "UniFi Network Application Beta",
                 "version": "8.1.0",
                 "slug": "network-beta-title",
                 "tags": ["unifi-network"],
@@ -428,6 +428,131 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
 
         self.assertEqual(len(results), 1)
         self.assertIn("(Beta)", results[0]["title"])
+
+
+class TestGraphQLBackendUnifiProtectAccessoryFiltering(TestGraphQLBackendBase):
+    """Releases tagged unifi-protect include accessory firmware (Viewport,
+    Cameras, AI Port, AI Key, AI Horn Speaker, SuperLink, sensors, NVR, tvOS,
+    iOS/Android apps). Only the main "UniFi Protect Application" release
+    should be announced."""
+
+    def _setup_mock(self, mock_session_cls: MagicMock, releases_data: list) -> None:
+        mock_response = AsyncMock()
+        mock_response.raise_for_status = MagicMock()
+        mock_response.json.return_value = {"data": {"releases": {"items": releases_data}}}
+
+        mock_session = mock_session_cls.return_value
+        mock_session.__aenter__.return_value = mock_session
+
+        mock_post_ctx = MagicMock()
+        mock_session.post.return_value = mock_post_ctx
+        mock_post_ctx.__aenter__.return_value = mock_response
+
+    @patch("aiohttp.ClientSession")
+    def test_filters_protect_accessories_and_keeps_application(self, mock_session_cls: MagicMock) -> None:
+        # Modeled on the real API response: accessory firmware is newer than
+        # the application, so the bug surfaces if filtering is not strict.
+        releases_data = [
+            {
+                "id": "1", "title": "UniFi Protect Viewport", "version": "1.4.33",
+                "slug": "viewport", "tags": ["unifi-protect"],
+                "createdAt": "2026-04-27T00:00:00Z",
+            },
+            {
+                "id": "2", "title": "UniFi Protect Cameras", "version": "5.2.92",
+                "slug": "cameras", "tags": ["unifi-protect"],
+                "createdAt": "2026-04-21T00:00:00Z",
+            },
+            {
+                "id": "3", "title": "UniFi Protect SuperLink", "version": "1.10.0",
+                "slug": "superlink", "tags": ["unifi-protect"],
+                "createdAt": "2026-04-21T00:00:00Z",
+            },
+            {
+                "id": "4", "title": "UniFi Protect AI Horn Speaker", "version": "1.3.6",
+                "slug": "ai-horn", "tags": ["unifi-protect"],
+                "createdAt": "2026-04-20T00:00:00Z",
+            },
+            {
+                "id": "5", "title": "UniFi Protect AI Port", "version": "5.1.10",
+                "slug": "ai-port", "tags": ["unifi-protect"],
+                "createdAt": "2026-04-19T00:00:00Z",
+            },
+            {
+                "id": "6", "title": "UniFi Protect AI Key", "version": "2.1.2",
+                "slug": "ai-key", "tags": ["unifi-protect"],
+                "createdAt": "2026-04-18T00:00:00Z",
+            },
+            {
+                "id": "7", "title": "UniFi Protect tvOS", "version": "3.5.0",
+                "slug": "tvos", "tags": ["unifi-protect"],
+                "createdAt": "2026-04-15T00:00:00Z",
+            },
+            {
+                "id": "8", "title": "UniFi Protect SuperLink Glass Break Sensor",
+                "version": "1.1.3", "slug": "glass-break",
+                "tags": ["unifi-protect"], "createdAt": "2026-03-27T00:00:00Z",
+            },
+            {
+                "id": "9", "title": "UniFi Protect Application", "version": "7.0.107",
+                "slug": "protect-app", "tags": ["unifi-protect"],
+                "createdAt": "2026-04-16T00:00:00Z",
+            },
+        ]
+        self._setup_mock(mock_session_cls, releases_data)
+
+        os.environ["TAGS"] = "unifi-protect"
+        backend = GraphQLBackend()
+
+        results = asyncio.run(backend.get_latest_releases())
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["title"], "UniFi Protect Application 7.0.107 (GA)")
+
+    @patch("aiohttp.ClientSession")
+    def test_returns_nothing_when_only_accessories_present(self, mock_session_cls: MagicMock) -> None:
+        releases_data = [
+            {
+                "id": "1", "title": "UniFi Protect Viewport", "version": "1.4.33",
+                "slug": "viewport", "tags": ["unifi-protect"],
+                "createdAt": "2026-04-27T00:00:00Z",
+            },
+        ]
+        self._setup_mock(mock_session_cls, releases_data)
+
+        os.environ["TAGS"] = "unifi-protect"
+        backend = GraphQLBackend()
+
+        results = asyncio.run(backend.get_latest_releases())
+        self.assertEqual(results, [])
+
+    @patch("aiohttp.ClientSession")
+    def test_filters_advisory_and_ups_from_unifi_network(self, mock_session_cls: MagicMock) -> None:
+        releases_data = [
+            {
+                "id": "1", "title": "Security Advisory Bulletin 062", "version": "062",
+                "slug": "advisory-062", "tags": ["unifi-network"],
+                "createdAt": "2026-03-18T00:00:00Z",
+            },
+            {
+                "id": "2", "title": "UniFi UPS", "version": "1.4.24",
+                "slug": "ups", "tags": ["unifi-network"],
+                "createdAt": "2026-03-31T00:00:00Z",
+            },
+            {
+                "id": "3", "title": "UniFi Network Application", "version": "10.3.58",
+                "slug": "network-app", "tags": ["unifi-network"],
+                "createdAt": "2026-04-22T00:00:00Z",
+            },
+        ]
+        self._setup_mock(mock_session_cls, releases_data)
+
+        os.environ["TAGS"] = "unifi-network"
+        backend = GraphQLBackend()
+
+        results = asyncio.run(backend.get_latest_releases())
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["title"], "UniFi Network Application 10.3.58 (GA)")
 
 
 class TestGraphQLBackendDetails(TestGraphQLBackendBase):
