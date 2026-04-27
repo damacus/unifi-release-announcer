@@ -62,11 +62,29 @@ class GraphQLBackend:
         "unifi-voip",
         "unifi-wireless",
         "unms",
+        "viewport",
         "wave",
         "wifiman",
     ]
 
     _ALLOWED_TAGS_SET = frozenset(ALLOWED_TAGS)
+
+    # Broad category tags that do not indicate a specific product and should not
+    # cause a release to be excluded when found alongside a configured tag.
+    GENERIC_TAGS = frozenset({
+        "60GHz",
+        "community-feedback",
+        "general",
+        "isp",
+        "routing",
+        "security",
+        "switching",
+        "unifi",
+    })
+
+    # Product-specific tags: presence of one of these on a release that is NOT
+    # in the configured tags means the release belongs to another product.
+    _PRODUCT_TAGS_SET = _ALLOWED_TAGS_SET - GENERIC_TAGS
 
     # Pre-compiled unwanted patterns to avoid re-allocating on every release
     UNWANTED_PATTERNS = (
@@ -164,15 +182,31 @@ class GraphQLBackend:
     def _process_releases_response(self, all_releases: list[dict], tags: list[str]) -> dict[str, dict]:
         """Filter and group releases by tag, returning the latest for each."""
         releases_by_tag = {}
+        configured_tags_set = set(tags)
+
         for release_data in all_releases:
             release_tags = release_data.get("tags", [])
             release_title = release_data.get("title", "").lower()
 
-            # Check if this release should be filtered out
+            # Check if this release should be filtered out by title pattern
             matched_pattern = next((p for p in self.UNWANTED_PATTERNS if p in release_title), None)
             if matched_pattern:
                 logging.debug(
                     "Filtering out release '%s' due to pattern '%s'", release_data.get("title"), matched_pattern
+                )
+                continue
+
+            # Skip releases that carry specific product tags not in our configured set.
+            # This prevents cross-tagged releases (e.g. a "viewport" release also tagged
+            # "unifi-protect") from appearing when the user hasn't asked for that product.
+            unconfigured_product_tags = [
+                t for t in release_tags
+                if t in self._PRODUCT_TAGS_SET and t not in configured_tags_set
+            ]
+            if unconfigured_product_tags:
+                logging.debug(
+                    "Skipping release '%s' - tagged with unconfigured products: %s",
+                    release_data.get("title"), unconfigured_product_tags,
                 )
                 continue
 

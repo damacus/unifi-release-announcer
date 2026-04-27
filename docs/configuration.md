@@ -76,6 +76,7 @@ The following tags are available for filtering UniFi releases:
 - `uisp-app` - UISP application
 - `uisp-power` - UISP Power management
 - `unms` - UNMS (legacy)
+- `viewport` - UniFi Viewport (display system)
 - `wave` - Wave products
 - `wifiman` - WiFiman application
 

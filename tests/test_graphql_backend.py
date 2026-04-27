@@ -196,12 +196,13 @@ class TestGraphQLBackendTags(TestGraphQLBackendBase):
         backend = GraphQLBackend()
         allowed_tags = backend.get_allowed_tags()
 
-        # Should include all 46 tags we discovered
-        self.assertEqual(len(allowed_tags), 46)
+        # Should include all 47 tags
+        self.assertEqual(len(allowed_tags), 47)
         self.assertIn("unifi-protect", allowed_tags)
         self.assertIn("unifi-network", allowed_tags)
         self.assertIn("edgemax", allowed_tags)
         self.assertIn("amplifi", allowed_tags)
+        self.assertIn("viewport", allowed_tags)
 
 
 class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
@@ -428,6 +429,78 @@ class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
 
         self.assertEqual(len(results), 1)
         self.assertIn("(Beta)", results[0]["title"])
+
+    @patch("aiohttp.ClientSession")
+    def test_filters_viewport_releases_when_not_configured(self, mock_session_cls: MagicMock) -> None:
+        """Test that viewport releases are excluded when viewport is not in configured tags.
+
+        UniFi Viewport integrates with UniFi Protect, so Ubiquiti cross-tags viewport
+        releases with 'unifi-protect'. Without this filter those releases would appear
+        whenever a user tracks 'unifi-protect'.
+        """
+        releases_data = [
+            {
+                "id": "100",
+                "title": "UniFi Viewport",
+                "version": "3.0.0",
+                "slug": "viewport-3-0-0",
+                "tags": ["unifi-protect", "viewport"],
+                "createdAt": "2023-01-02T00:00:00Z",
+            },
+            {
+                "id": "200",
+                "title": "UniFi Protect",
+                "version": "5.0.0",
+                "slug": "protect-5-0-0",
+                "tags": ["unifi-protect"],
+                "createdAt": "2023-01-01T00:00:00Z",
+            },
+        ]
+        self._setup_mock(mock_session_cls, releases_data)
+
+        os.environ["TAGS"] = "unifi-protect"
+        backend = GraphQLBackend()
+
+        results = asyncio.run(backend.get_latest_releases())
+
+        # Viewport release must be excluded; only the pure Protect release returned
+        self.assertEqual(len(results), 1)
+        self.assertIn("UniFi Protect 5.0.0", results[0]["title"])
+        self.assertNotIn("Viewport", results[0]["title"])
+
+    @patch("aiohttp.ClientSession")
+    def test_includes_viewport_releases_when_configured(self, mock_session_cls: MagicMock) -> None:
+        """Test that viewport releases are included when viewport is explicitly configured."""
+        releases_data = [
+            {
+                "id": "100",
+                "title": "UniFi Viewport",
+                "version": "3.0.0",
+                "slug": "viewport-3-0-0",
+                "tags": ["viewport"],
+                "createdAt": "2023-01-02T00:00:00Z",
+            },
+            {
+                "id": "200",
+                "title": "UniFi Protect",
+                "version": "5.0.0",
+                "slug": "protect-5-0-0",
+                "tags": ["unifi-protect"],
+                "createdAt": "2023-01-01T00:00:00Z",
+            },
+        ]
+        self._setup_mock(mock_session_cls, releases_data)
+
+        os.environ["TAGS"] = "unifi-protect,viewport"
+        backend = GraphQLBackend()
+
+        results = asyncio.run(backend.get_latest_releases())
+
+        # Both tags should have a result
+        self.assertEqual(len(results), 2)
+        titles = [r["title"] for r in results]
+        self.assertTrue(any("UniFi Protect 5.0.0" in t for t in titles))
+        self.assertTrue(any("UniFi Viewport 3.0.0" in t for t in titles))
 
 
 class TestGraphQLBackendDetails(TestGraphQLBackendBase):
