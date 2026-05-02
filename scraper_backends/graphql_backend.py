@@ -295,7 +295,9 @@ class GraphQLBackend:
 
             if not all_releases:
                 logging.warning("No releases found in API response")
-                logging.debug(f"Full API response: {data}")
+                # Full response might contain sensitive data or malicious strings
+                # Only log keys or sanitized info if needed for debugging
+                logging.debug(f"Full API response keys: {list(data.keys())}")
                 return []
 
             logging.info(f"Found {len(all_releases)} total releases from API")
@@ -310,7 +312,7 @@ class GraphQLBackend:
             return releases
 
         except Exception as e:
-            logging.error(f"Error fetching latest releases: {e}")
+            logging.error(f"Error fetching latest releases: {type(e).__name__}")
             return []
 
     async def get_latest_release(self) -> dict | None:
@@ -410,7 +412,8 @@ class GraphQLBackend:
             data = await self._make_graphql_request(payload)
 
             if "errors" in data:
-                logging.error(f"GraphQL errors: {data['errors']}")
+                error_msgs = [str(err.get("message", "")).replace("\n", " ") for err in data["errors"]]
+                logging.error(f"GraphQL errors: {error_msgs}")
                 return None
 
             releases = data.get("data", {}).get("releases", {}).get("items", [])
@@ -427,10 +430,12 @@ class GraphQLBackend:
             }
 
         except aiohttp.ClientError as e:
-            logging.error(f"Network error fetching releases: {e}")
+            # For ClientError, we can log the status if it exists, otherwise just the type
+            status = getattr(e, "status", "N/A")
+            logging.error(f"Network error fetching releases: {type(e).__name__} (status: {status})")
             return None
         except Exception as e:
-            logging.error(f"Unexpected error in GraphQL backend: {e}")
+            logging.error(f"Unexpected error in GraphQL backend: {type(e).__name__}")
             return None
 
     def _parse_release(self, release: dict) -> dict:
@@ -497,7 +502,8 @@ class GraphQLBackend:
             data = await self._make_graphql_request(payload)
 
             if "errors" in data:
-                logging.error(f"GraphQL errors: {data['errors']}")
+                error_msgs = [str(err.get("message", "")).replace("\n", " ") for err in data["errors"]]
+                logging.error(f"GraphQL errors: {error_msgs}")
                 return None
 
             release = data.get("data", {}).get("release")
@@ -507,5 +513,5 @@ class GraphQLBackend:
             return None
 
         except Exception as e:
-            logging.error(f"Error fetching release details for {release_id}: {e}")
+            logging.error(f"Error fetching release details: {type(e).__name__}")
             return None
