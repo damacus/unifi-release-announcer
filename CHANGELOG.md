@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.9](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.8...unifi-release-announcer-v0.2.9) (2026-05-02)
+
+
+### Bug Fixes
+
+* sanitize GraphQL error and exception logging ([#178](https://github.com/damacus/unifi-release-announcer/issues/178)) ([2348fba](https://github.com/damacus/unifi-release-announcer/commit/2348fbadd37d3ff5950b8a435797ff5f217694d9))
+
 ## [0.2.8](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.7...unifi-release-announcer-v0.2.8) (2026-04-27)
 
 
