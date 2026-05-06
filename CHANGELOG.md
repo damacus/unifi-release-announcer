@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.10](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.9...unifi-release-announcer-v0.2.10) (2026-05-06)
+
+
+### Miscellaneous
+
+* **deps:** update actions/create-github-app-token action to v3.1.1 ([#186](https://github.com/damacus/unifi-release-announcer/issues/186)) ([a98b115](https://github.com/damacus/unifi-release-announcer/commit/a98b11577e3b2f383e1ebd7a818d82fa6ecfed58))
+* **deps:** update astral-sh/setup-uv action to v8 ([#189](https://github.com/damacus/unifi-release-announcer/issues/189)) ([e0bb043](https://github.com/damacus/unifi-release-announcer/commit/e0bb043b5f4945ccac2a018fba115bac3e264880))
+* **deps:** update docker/build-push-action action to v7.1.0 ([#187](https://github.com/damacus/unifi-release-announcer/issues/187)) ([e8a823a](https://github.com/damacus/unifi-release-announcer/commit/e8a823afeb73836ee4054ef96d1dbf40d7cf4104))
+* **deps:** update docker/build-push-action digest to bcafcac ([#181](https://github.com/damacus/unifi-release-announcer/issues/181)) ([c3e42c1](https://github.com/damacus/unifi-release-announcer/commit/c3e42c19f48ccbce1496809c0a839529cd7963be))
+* **deps:** update ghcr.io/astral-sh/uv:latest docker digest to bca7f69 ([#182](https://github.com/damacus/unifi-release-announcer/issues/182)) ([87b5dd9](https://github.com/damacus/unifi-release-announcer/commit/87b5dd9f1a3ae8d0b022d9e5fc5b4cc078ec352a))
+* **deps:** update googleapis/release-please-action action to v5 ([#190](https://github.com/damacus/unifi-release-announcer/issues/190)) ([8bbfd68](https://github.com/damacus/unifi-release-announcer/commit/8bbfd680573bd3c1831a22082b70a5ca89cccf90))
+* **deps:** update mcr.microsoft.com/devcontainers/python:dev-3.13-trixie docker digest to 32822f0 ([#184](https://github.com/damacus/unifi-release-announcer/issues/184)) ([8ae810a](https://github.com/damacus/unifi-release-announcer/commit/8ae810ab84f7ce20739c06822079c501c4b58ba0))
+* **deps:** update python:3.14-alpine docker digest to dd4d2bd ([#185](https://github.com/damacus/unifi-release-announcer/issues/185)) ([0800016](https://github.com/damacus/unifi-release-announcer/commit/08000164d7719ba896a8127e058846570117de63))
+* **deps:** update step-security/harden-runner action to v2.19.1 ([#188](https://github.com/damacus/unifi-release-announcer/issues/188)) ([2c68332](https://github.com/damacus/unifi-release-announcer/commit/2c683323b1b4c4f7ea284a052b4142aed71d53a8))
+
 ## [0.2.9](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.8...unifi-release-announcer-v0.2.9) (2026-05-02)
 
 
