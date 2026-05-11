@@ -295,9 +295,6 @@ class GraphQLBackend:
 
             if not all_releases:
                 logging.warning("No releases found in API response")
-                # Full response might contain sensitive data or malicious strings
-                # Only log keys or sanitized info if needed for debugging
-                logging.debug(f"Full API response keys: {list(data.keys())}")
                 return []
 
             logging.info(f"Found {len(all_releases)} total releases from API")
