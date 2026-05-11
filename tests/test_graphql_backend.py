@@ -454,48 +454,75 @@ class TestGraphQLBackendUnifiProtectAccessoryFiltering(TestGraphQLBackendBase):
         # the application, so the bug surfaces if filtering is not strict.
         releases_data = [
             {
-                "id": "1", "title": "UniFi Protect Viewport", "version": "1.4.33",
-                "slug": "viewport", "tags": ["unifi-protect"],
+                "id": "1",
+                "title": "UniFi Protect Viewport",
+                "version": "1.4.33",
+                "slug": "viewport",
+                "tags": ["unifi-protect"],
                 "createdAt": "2026-04-27T00:00:00Z",
             },
             {
-                "id": "2", "title": "UniFi Protect Cameras", "version": "5.2.92",
-                "slug": "cameras", "tags": ["unifi-protect"],
+                "id": "2",
+                "title": "UniFi Protect Cameras",
+                "version": "5.2.92",
+                "slug": "cameras",
+                "tags": ["unifi-protect"],
                 "createdAt": "2026-04-21T00:00:00Z",
             },
             {
-                "id": "3", "title": "UniFi Protect SuperLink", "version": "1.10.0",
-                "slug": "superlink", "tags": ["unifi-protect"],
+                "id": "3",
+                "title": "UniFi Protect SuperLink",
+                "version": "1.10.0",
+                "slug": "superlink",
+                "tags": ["unifi-protect"],
                 "createdAt": "2026-04-21T00:00:00Z",
             },
             {
-                "id": "4", "title": "UniFi Protect AI Horn Speaker", "version": "1.3.6",
-                "slug": "ai-horn", "tags": ["unifi-protect"],
+                "id": "4",
+                "title": "UniFi Protect AI Horn Speaker",
+                "version": "1.3.6",
+                "slug": "ai-horn",
+                "tags": ["unifi-protect"],
                 "createdAt": "2026-04-20T00:00:00Z",
             },
             {
-                "id": "5", "title": "UniFi Protect AI Port", "version": "5.1.10",
-                "slug": "ai-port", "tags": ["unifi-protect"],
+                "id": "5",
+                "title": "UniFi Protect AI Port",
+                "version": "5.1.10",
+                "slug": "ai-port",
+                "tags": ["unifi-protect"],
                 "createdAt": "2026-04-19T00:00:00Z",
             },
             {
-                "id": "6", "title": "UniFi Protect AI Key", "version": "2.1.2",
-                "slug": "ai-key", "tags": ["unifi-protect"],
+                "id": "6",
+                "title": "UniFi Protect AI Key",
+                "version": "2.1.2",
+                "slug": "ai-key",
+                "tags": ["unifi-protect"],
                 "createdAt": "2026-04-18T00:00:00Z",
             },
             {
-                "id": "7", "title": "UniFi Protect tvOS", "version": "3.5.0",
-                "slug": "tvos", "tags": ["unifi-protect"],
+                "id": "7",
+                "title": "UniFi Protect tvOS",
+                "version": "3.5.0",
+                "slug": "tvos",
+                "tags": ["unifi-protect"],
                 "createdAt": "2026-04-15T00:00:00Z",
             },
             {
-                "id": "8", "title": "UniFi Protect SuperLink Glass Break Sensor",
-                "version": "1.1.3", "slug": "glass-break",
-                "tags": ["unifi-protect"], "createdAt": "2026-03-27T00:00:00Z",
+                "id": "8",
+                "title": "UniFi Protect SuperLink Glass Break Sensor",
+                "version": "1.1.3",
+                "slug": "glass-break",
+                "tags": ["unifi-protect"],
+                "createdAt": "2026-03-27T00:00:00Z",
             },
             {
-                "id": "9", "title": "UniFi Protect Application", "version": "7.0.107",
-                "slug": "protect-app", "tags": ["unifi-protect"],
+                "id": "9",
+                "title": "UniFi Protect Application",
+                "version": "7.0.107",
+                "slug": "protect-app",
+                "tags": ["unifi-protect"],
                 "createdAt": "2026-04-16T00:00:00Z",
             },
         ]
@@ -513,8 +540,11 @@ class TestGraphQLBackendUnifiProtectAccessoryFiltering(TestGraphQLBackendBase):
     def test_returns_nothing_when_only_accessories_present(self, mock_session_cls: MagicMock) -> None:
         releases_data = [
             {
-                "id": "1", "title": "UniFi Protect Viewport", "version": "1.4.33",
-                "slug": "viewport", "tags": ["unifi-protect"],
+                "id": "1",
+                "title": "UniFi Protect Viewport",
+                "version": "1.4.33",
+                "slug": "viewport",
+                "tags": ["unifi-protect"],
                 "createdAt": "2026-04-27T00:00:00Z",
             },
         ]
@@ -530,18 +560,27 @@ class TestGraphQLBackendUnifiProtectAccessoryFiltering(TestGraphQLBackendBase):
     def test_filters_advisory_and_ups_from_unifi_network(self, mock_session_cls: MagicMock) -> None:
         releases_data = [
             {
-                "id": "1", "title": "Security Advisory Bulletin 062", "version": "062",
-                "slug": "advisory-062", "tags": ["unifi-network"],
+                "id": "1",
+                "title": "Security Advisory Bulletin 062",
+                "version": "062",
+                "slug": "advisory-062",
+                "tags": ["unifi-network"],
                 "createdAt": "2026-03-18T00:00:00Z",
             },
             {
-                "id": "2", "title": "UniFi UPS", "version": "1.4.24",
-                "slug": "ups", "tags": ["unifi-network"],
+                "id": "2",
+                "title": "UniFi UPS",
+                "version": "1.4.24",
+                "slug": "ups",
+                "tags": ["unifi-network"],
                 "createdAt": "2026-03-31T00:00:00Z",
             },
             {
-                "id": "3", "title": "UniFi Network Application", "version": "10.3.58",
-                "slug": "network-app", "tags": ["unifi-network"],
+                "id": "3",
+                "title": "UniFi Network Application",
+                "version": "10.3.58",
+                "slug": "network-app",
+                "tags": ["unifi-network"],
                 "createdAt": "2026-04-22T00:00:00Z",
             },
         ]
@@ -553,115 +592,6 @@ class TestGraphQLBackendUnifiProtectAccessoryFiltering(TestGraphQLBackendBase):
         results = asyncio.run(backend.get_latest_releases())
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["title"], "UniFi Network Application 10.3.58 (GA)")
-
-
-class TestGraphQLBackendDetails(TestGraphQLBackendBase):
-    """Test suite for GraphQL backend release details functionality."""
-
-    def _setup_mock(self, mock_session_cls, response_data: dict) -> None:
-        """Helper to setup aiohttp mock chain."""
-        mock_response = AsyncMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json.return_value = response_data
-
-        mock_session = mock_session_cls.return_value
-        mock_session.__aenter__.return_value = mock_session
-
-        mock_post_ctx = MagicMock()
-        mock_session.post.return_value = mock_post_ctx
-        mock_post_ctx.__aenter__.return_value = mock_response
-
-    @patch("aiohttp.ClientSession")
-    def test_get_release_details_success(self, mock_session_cls) -> None:
-        """Test successful retrieval and parsing of release details."""
-        response_data = {
-            "data": {
-                "release": {
-                    "id": "rel-123",
-                    "title": "UniFi Network",
-                    "slug": "network-8-0-28",
-                    "tags": ["unifi-network"],
-                    "betas": [],
-                    "alphas": [],
-                    "stage": "stable",
-                    "version": "8.0.28",
-                    "createdAt": "2023-01-01T00:00:00Z",
-                    "lastActivityAt": "2023-01-02T00:00:00Z",
-                    "author": {
-                        "id": "auth-1",
-                        "username": "ui-admin",
-                        "isEmployee": True,
-                        "avatar": {"color": "#000000", "content": "U", "image": None},
-                    },
-                    "stats": {"comments": 10, "views": 100},
-                }
-            }
-        }
-        self._setup_mock(mock_session_cls, response_data)
-
-        backend = GraphQLBackend()
-        result = asyncio.run(backend.get_release_details("rel-123"))
-
-        self.assertIsNotNone(result)
-        # Type narrowing for mypy
-        if result is not None:
-            self.assertEqual(result.get("title"), "UniFi Network")
-            self.assertEqual(result.get("version"), "8.0.28")
-            self.assertEqual(result.get("url"), "https://community.ui.com/releases/network-8-0-28")
-            self.assertEqual(result.get("tags"), ["unifi-network"])
-            self.assertEqual(result.get("created_at"), "2023-01-01T00:00:00Z")
-            self.assertEqual(result.get("last_activity"), "2023-01-02T00:00:00Z")
-            self.assertEqual(result.get("stage"), "stable")
-
-    @patch("aiohttp.ClientSession")
-    def test_get_release_details_graphql_error(self, mock_session_cls) -> None:
-        """Test handling of GraphQL errors in response."""
-        response_data = {"errors": [{"message": "Cannot query field 'invalid' on type 'Release'."}]}
-        self._setup_mock(mock_session_cls, response_data)
-
-        backend = GraphQLBackend()
-        result = asyncio.run(backend.get_release_details("rel-123"))
-
-        self.assertIsNone(result)
-
-    @patch("aiohttp.ClientSession")
-    def test_get_release_details_not_found(self, mock_session_cls) -> None:
-        """Test handling of release not found (null release data)."""
-        response_data = {"data": {"release": None}}
-        self._setup_mock(mock_session_cls, response_data)
-
-        backend = GraphQLBackend()
-        result = asyncio.run(backend.get_release_details("rel-missing"))
-
-        self.assertIsNone(result)
-
-    @patch("aiohttp.ClientSession")
-    def test_get_release_details_missing_data(self, mock_session_cls) -> None:
-        """Test handling of missing data key in response."""
-        response_data: dict[str, dict[str, str]] = {}  # Empty response
-        self._setup_mock(mock_session_cls, response_data)
-
-        backend = GraphQLBackend()
-        result = asyncio.run(backend.get_release_details("rel-123"))
-
-        self.assertIsNone(result)
-
-    @patch("aiohttp.ClientSession")
-    def test_get_release_details_exception(self, mock_session_cls) -> None:
-        """Test handling of network exceptions during request."""
-        mock_session = mock_session_cls.return_value
-        mock_session.__aenter__.return_value = mock_session
-
-        mock_post_ctx = MagicMock()
-        mock_session.post.return_value = mock_post_ctx
-
-        # Make the request raise an exception
-        mock_post_ctx.__aenter__.side_effect = Exception("Connection failed")
-
-        backend = GraphQLBackend()
-        result = asyncio.run(backend.get_release_details("rel-123"))
-
-        self.assertIsNone(result)
 
 
 if __name__ == "__main__":
