@@ -191,18 +191,6 @@ class TestGraphQLBackendTags(TestGraphQLBackendBase):
         # Should return empty list when no releases found
         self.assertEqual(results, [])
 
-    def test_get_allowed_tags_returns_complete_list(self) -> None:
-        """Test that get_allowed_tags returns the complete list of valid tags."""
-        backend = GraphQLBackend()
-        allowed_tags = backend.get_allowed_tags()
-
-        # Should include all 46 tags we discovered
-        self.assertEqual(len(allowed_tags), 46)
-        self.assertIn("unifi-protect", allowed_tags)
-        self.assertIn("unifi-network", allowed_tags)
-        self.assertIn("edgemax", allowed_tags)
-        self.assertIn("amplifi", allowed_tags)
-
 
 class TestGraphQLBackendFiltering(TestGraphQLBackendBase):
     """Test suite for GraphQL backend filtering functionality."""

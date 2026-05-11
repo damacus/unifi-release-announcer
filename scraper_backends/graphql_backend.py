@@ -132,10 +132,6 @@ class GraphQLBackend:
                 response.raise_for_status()
                 return await response.json()
 
-    def get_allowed_tags(self) -> list[str]:
-        """Get the list of all allowed tags."""
-        return self.ALLOWED_TAGS.copy()
-
     def get_configured_tags(self) -> list[str]:
         """
         Get configured tags from TAGS environment variable.
