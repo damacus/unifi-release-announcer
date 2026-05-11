@@ -8,7 +8,6 @@ More efficient and reliable than web scraping.
 import contextlib
 import logging
 import os
-from datetime import datetime
 
 import aiohttp
 
@@ -203,9 +202,7 @@ class GraphQLBackend:
                 if tag not in release_tags:
                     continue
                 if not self._is_release_allowed_for_tag(release_title, tag):
-                    logging.debug(
-                        "Filtering out release '%s' for tag '%s'", release_data.get("title"), tag
-                    )
+                    logging.debug("Filtering out release '%s' for tag '%s'", release_data.get("title"), tag)
                     continue
                 existing = releases_by_tag.get(tag)
                 if existing is None or release_data["createdAt"] > existing["createdAt"]:
@@ -436,82 +433,4 @@ class GraphQLBackend:
             return None
         except Exception as e:
             logging.error(f"Unexpected error in GraphQL backend: {type(e).__name__}")
-            return None
-
-    def _parse_release(self, release: dict) -> dict:
-        """Parse a single release into structured format."""
-        return {
-            "title": release["title"],
-            "slug": release["slug"],
-            "url": f"https://community.ui.com/releases/{release['slug']}",
-            "tags": release["tags"],
-            "stage": release["stage"],
-            "version": release["version"],
-            "created_at": release["createdAt"],
-            "created_date": datetime.fromisoformat(release["createdAt"].replace("Z", "+00:00")).strftime("%Y-%m-%d"),
-            "stats": release.get("stats", {}),
-            "has_engagement": release.get("hasUiEngagement", False),
-            "author": release.get("author"),
-            "last_activity": release.get("lastActivityAt"),
-        }
-
-    async def get_release_details(self, release_id: str) -> dict | None:
-        """
-        Get detailed information for a specific release.
-
-        Args:
-            release_id: The release ID to fetch details for
-
-        Returns:
-            Detailed release information or None if not found
-        """
-        try:
-            query = """
-            query ReleaseDetailQuery($id: ID!) {
-              release(id: $id) {
-                id
-                title
-                slug
-                tags
-                betas
-                alphas
-                stage
-                version
-                createdAt
-                lastActivityAt
-                author {
-                  id
-                  username
-                  isEmployee
-                  avatar {
-                    color
-                    content
-                    image
-                  }
-                }
-                stats {
-                  comments
-                  views
-                }
-              }
-            }
-            """
-
-            payload = {"query": query, "variables": {"id": release_id}, "operationName": "ReleaseDetailQuery"}
-
-            data = await self._make_graphql_request(payload)
-
-            if "errors" in data:
-                error_msgs = [str(err.get("message", "")).replace("\n", " ") for err in data["errors"]]
-                logging.error(f"GraphQL errors: {error_msgs}")
-                return None
-
-            release = data.get("data", {}).get("release")
-            if release:
-                return self._parse_release(release)
-
-            return None
-
-        except Exception as e:
-            logging.error(f"Error fetching release details: {type(e).__name__}")
             return None
