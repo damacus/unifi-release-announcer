@@ -203,9 +203,7 @@ class GraphQLBackend:
                 if tag not in release_tags:
                     continue
                 if not self._is_release_allowed_for_tag(release_title, tag):
-                    logging.debug(
-                        "Filtering out release '%s' for tag '%s'", release_data.get("title"), tag
-                    )
+                    logging.debug("Filtering out release '%s' for tag '%s'", release_data.get("title"), tag)
                     continue
                 existing = releases_by_tag.get(tag)
                 if existing is None or release_data["createdAt"] > existing["createdAt"]:
@@ -314,129 +312,6 @@ class GraphQLBackend:
         except Exception as e:
             logging.error(f"Error fetching latest releases: {type(e).__name__}")
             return []
-
-    async def get_latest_release(self) -> dict | None:
-        """
-        Get the latest UniFi Protect release using GraphQL API.
-
-        Returns:
-            Dict with title, url, and tag keys, or None if not found
-        """
-        try:
-            tags = self.get_configured_tags()
-
-            query = """
-            query ReleaseFeedListQuery(
-                $tags: [String!],
-                $betas: [String!],
-                $alphas: [String!],
-                $offset: Int,
-                $limit: Int,
-                $sortBy: ReleasesSortBy,
-                $userIsFollowing: Boolean,
-                $featuredOnly: Boolean,
-                $searchTerm: String,
-                $filterTags: [String!],
-                $filterEATags: [String!],
-                $statuses: [ReleaseStatus!]
-            ) {
-              releases(
-                tags: $tags
-                betas: $betas
-                alphas: $alphas
-                offset: $offset
-                limit: $limit
-                sortBy: $sortBy
-                userIsFollowing: $userIsFollowing
-                featuredOnly: $featuredOnly
-                searchTerm: $searchTerm
-                filterTags: $filterTags
-                filterEATags: $filterEATags
-                statuses: $statuses
-              ) {
-                pageInfo {
-                  offset
-                  limit
-                }
-                totalCount
-                items {
-                  id
-                  title
-                  slug
-                  tags
-                  betas
-                  alphas
-                  stage
-                  version
-                  userStatus {
-                    isFollowing
-                    lastViewedAt
-                  }
-                  author {
-                    id
-                    username
-                    isEmployee
-                    avatar {
-                      color
-                      content
-                      image
-                    }
-                  }
-                  createdAt
-                  lastActivityAt
-                  hasUiEngagement
-                  isLocked
-                  stats {
-                    comments
-                    views
-                  }
-                }
-              }
-            }
-            """
-
-            variables = {
-                "limit": 1,
-                "offset": 0,
-                "sortBy": "LATEST",
-                "tags": tags,
-                "betas": [],
-                "alphas": [],
-                "searchTerm": "",
-            }
-
-            payload = {"query": query, "variables": variables, "operationName": "ReleaseFeedListQuery"}
-
-            logging.info("Fetching latest UniFi Protect release")
-
-            data = await self._make_graphql_request(payload)
-
-            if "errors" in data:
-                error_msgs = [str(err.get("message", "")).replace("\n", " ") for err in data["errors"]]
-                logging.error(f"GraphQL errors: {error_msgs}")
-                return None
-
-            releases = data.get("data", {}).get("releases", {}).get("items", [])
-
-            if not releases:
-                logging.info("No releases found")
-                return None
-
-            latest = releases[0]
-            return {
-                "title": f"{latest['title']} {latest['version']}",
-                "url": f"https://community.ui.com/releases/{latest['slug']}/{latest['id']}",
-                "tag": "",
-            }
-
-        except aiohttp.ClientError as e:
-            # For ClientError, we can log the status if it exists, otherwise just the type
-            status = getattr(e, "status", "N/A")
-            logging.error(f"Network error fetching releases: {type(e).__name__} (status: {status})")
-            return None
-        except Exception as e:
-            logging.error(f"Unexpected error in GraphQL backend: {type(e).__name__}")
-            return None
 
     def _parse_release(self, release: dict) -> dict:
         """Parse a single release into structured format."""

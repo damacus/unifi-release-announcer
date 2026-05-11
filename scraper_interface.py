@@ -21,26 +21,6 @@ class Release:
     tag: str = ""  # Optional tag field for multi-tag support
 
 
-async def get_latest_release(session: aiohttp.ClientSession | None = None) -> Release | None:
-    """Get the latest release using GraphQL backend.
-
-    Args:
-        session: Optional aiohttp ClientSession for connection pooling
-
-    Returns:
-        Release object if found, None otherwise
-    """
-    try:
-        scraper = GraphQLBackend(session=session) if session else _backend
-        result = await scraper.get_latest_release()
-        if result is None:
-            return None
-        return Release(title=result["title"], url=result["url"], tag=result["tag"])
-    except Exception as e:
-        logging.error(f"Error fetching release: {e}")
-        return None
-
-
 async def get_latest_releases(session: aiohttp.ClientSession | None = None) -> list[Release]:
     """Get the latest releases for all configured tags using GraphQL backend.
 

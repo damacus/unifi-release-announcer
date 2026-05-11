@@ -310,14 +310,11 @@ rm cache/release_state.json
 
 ### Test Scraper Backends
 
-You can test each backend independently:
+You can test the backend independently:
 
 ```bash
 # Test GraphQL backend
-uv run python -c "from scraper_backends.graphql_backend import GraphQLBackend; backend = GraphQLBackend(); print(backend.get_latest_release())"
-
-# Test RSS backend
-uv run python -c "from scraper_backends.rss_backend import RSSBackend; backend = RSSBackend(); print(backend.get_latest_release())"
+uv run python -c "import asyncio; from scraper_backends.graphql_backend import GraphQLBackend; backend = GraphQLBackend(); print(asyncio.run(backend.get_latest_releases()))"
 ```
 
 ### Verify Discord Bot Token

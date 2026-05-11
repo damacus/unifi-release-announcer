@@ -246,7 +246,7 @@ task test-cov
 uv run pytest tests/test_graphql_backend.py -v
 
 # Run specific test
-uv run pytest tests/test_graphql_backend.py::test_get_latest_release -v
+uv run pytest tests/test_graphql_backend.py::test_get_latest_releases -v
 ```
 
 ### Writing Tests
@@ -307,7 +307,7 @@ from scraper_interface import ScraperInterface
 class NewBackend(ScraperInterface):
     """New scraper backend implementation."""
     
-    def get_latest_release(self) -> dict:
+    async def get_latest_releases(self) -> list[dict]:
         """Fetch the latest release."""
         # Implementation
         pass
@@ -333,8 +333,8 @@ from scraper_backends.new_backend import NewBackend
 def test_new_backend():
     """Test new backend."""
     backend = NewBackend()
-    release = backend.get_latest_release()
-    assert release is not None
+    releases = await backend.get_latest_releases()
+    assert releases is not None
 ```
 
 ### Adding New Configuration Options

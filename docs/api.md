@@ -104,20 +104,6 @@ release = Release(
 
 #### Functions
 
-##### `async get_latest_release() -> Release | None`
-
-Fetches the latest release using the GraphQL backend.
-
-**Returns:**
-- `Release | None`: Release object if found, None if error occurs
-
-**Example:**
-```python
-release = await get_latest_release()
-if release:
-    print(f"Latest: {release.title}")
-```
-
 ##### `async get_latest_releases() -> list[Release]`
 
 Fetches the latest releases for all configured tags.
@@ -223,19 +209,6 @@ GraphQLBackend()
 
 **Methods:**
 
-###### `async get_latest_release() -> Release | None`
-
-Fetches the latest release for the first configured tag.
-
-**Returns:**
-- `Release | None`: Latest release or None if not found
-
-**Example:**
-```python
-backend = GraphQLBackend()
-release = await backend.get_latest_release()
-```
-
 ###### `async get_latest_releases() -> list[dict]`
 
 Fetches the latest releases for all configured tags.
@@ -260,36 +233,6 @@ Private method that fetches releases for a specific tag.
 
 **Returns:**
 - `dict | None`: Release dictionary or None if not found
-
----
-
-### scraper_backends/rss_backend.py
-
-RSS-based backend for fetching UniFi releases (legacy).
-
-#### Classes
-
-##### `RSSBackend`
-
-Scraper implementation using the Ubiquiti Community RSS feed.
-
-**Constructor:**
-```python
-RSSBackend()
-```
-
-**Methods:**
-
-###### `async get_latest_release() -> Release | None`
-
-Fetches the latest release from the RSS feed.
-
-**Returns:**
-- `Release | None`: Latest release or None if error occurs
-
-**Note:** The RSS backend does not support tag filtering and returns the absolute latest release regardless of product.
-
----
 
 ### release_parser.py
 
