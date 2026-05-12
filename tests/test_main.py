@@ -1,7 +1,7 @@
 """Tests for the main.py application functions."""
 
 import unittest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, PropertyMock, patch
 
 import discord
 
@@ -330,6 +330,34 @@ class TestCheckForUpdates(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(mock_process.await_count, 2)
         mock_process.assert_any_await(releases[0])
         mock_process.assert_any_await(releases[2])
+
+
+class TestBotEvents(unittest.IsolatedAsyncioTestCase):
+    """Test suite for bot event handlers."""
+
+    @patch("main.check_for_updates.start")
+    @patch("main.logging.info")
+    async def test_on_ready_logs_user_details_and_starts_loop(self, mock_logging_info, mock_start) -> None:
+        mock_user = MagicMock()
+        mock_user.name = "TestBot"
+        mock_user.id = 123456789
+
+        with patch("discord.Client.user", new_callable=PropertyMock) as mock_client_user:
+            mock_client_user.return_value = mock_user
+            await main.on_ready()
+
+            mock_logging_info.assert_any_call("Logged in as %s (%s)", "TestBot", 123456789)
+            mock_start.assert_called_once()
+
+    @patch("main.check_for_updates.start")
+    @patch("main.logging.info")
+    async def test_on_ready_logs_missing_user_details_and_starts_loop(self, mock_logging_info, mock_start) -> None:
+        with patch("discord.Client.user", new_callable=PropertyMock) as mock_client_user:
+            mock_client_user.return_value = None
+            await main.on_ready()
+
+            mock_logging_info.assert_any_call("Logged in, but user details not available yet.")
+            mock_start.assert_called_once()
 
 
 if __name__ == "__main__":
