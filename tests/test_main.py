@@ -332,5 +332,56 @@ class TestCheckForUpdates(unittest.IsolatedAsyncioTestCase):
         mock_process.assert_any_await(releases[2])
 
 
+
+class TestAnnouncerClient(unittest.IsolatedAsyncioTestCase):
+    """Test suite for the AnnouncerClient class."""
+
+    @patch("main.aiohttp.ClientSession")
+    async def test_setup_hook_creates_session(self, mock_client_session) -> None:
+        """Test that setup_hook initializes the aiohttp ClientSession."""
+        # Create a client with required intents
+        intents = discord.Intents.default()
+        client = main.AnnouncerClient(intents=intents)
+
+        # Verify initial state
+        self.assertIsNone(client.session)
+
+        # Call setup_hook
+        await client.setup_hook()
+
+        # Verify session is created and assigned
+        mock_client_session.assert_called_once()
+        self.assertEqual(client.session, mock_client_session.return_value)
+
+    @patch("main.aiohttp.ClientSession")
+    async def test_close_closes_session(self, mock_client_session) -> None:
+        """Test that close method closes the aiohttp ClientSession if it exists."""
+        intents = discord.Intents.default()
+        client = main.AnnouncerClient(intents=intents)
+
+        # Mock session attribute
+        mock_session_instance = AsyncMock()
+        client.session = mock_session_instance
+
+        # Call close
+        await client.close()
+
+        # Verify session is closed
+        mock_session_instance.close.assert_awaited_once()
+
+    async def test_close_no_session(self) -> None:
+        """Test that close method handles missing session safely."""
+        intents = discord.Intents.default()
+        client = main.AnnouncerClient(intents=intents)
+
+        # Ensure session is None
+        self.assertIsNone(client.session)
+
+        # Call close, should not raise any exceptions
+        try:
+            await client.close()
+        except Exception as e:
+            self.fail(f"close() raised an exception when session is None: {e}")
+
 if __name__ == "__main__":
     unittest.main()
