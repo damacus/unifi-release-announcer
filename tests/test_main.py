@@ -332,5 +332,32 @@ class TestCheckForUpdates(unittest.IsolatedAsyncioTestCase):
         mock_process.assert_any_await(releases[2])
 
 
+
+class TestAnnouncerClient(unittest.IsolatedAsyncioTestCase):
+    """Test suite for AnnouncerClient."""
+
+    def setUp(self) -> None:
+        self.client = main.AnnouncerClient(intents=discord.Intents.default())
+
+    @patch("main.aiohttp.ClientSession")
+    async def test_setup_hook_initializes_session(self, mock_session) -> None:
+        await self.client.setup_hook()
+        mock_session.assert_called_once()
+        self.assertEqual(self.client.session, mock_session.return_value)
+
+    @patch("discord.Client.close", new_callable=AsyncMock)
+    async def test_close_with_session(self, mock_super_close) -> None:
+        self.client.session = AsyncMock()
+        await self.client.close()
+        self.client.session.close.assert_awaited_once()
+        mock_super_close.assert_awaited_once()
+
+    @patch("discord.Client.close", new_callable=AsyncMock)
+    async def test_close_without_session(self, mock_super_close) -> None:
+        self.client.session = None
+        await self.client.close()
+        mock_super_close.assert_awaited_once()
+
+
 if __name__ == "__main__":
     unittest.main()
