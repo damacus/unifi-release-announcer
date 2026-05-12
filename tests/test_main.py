@@ -261,6 +261,12 @@ class TestProcessNewRelease(unittest.IsolatedAsyncioTestCase):
 class TestCheckForUpdates(unittest.IsolatedAsyncioTestCase):
     """Test suite for the check_for_updates background task."""
 
+    async def test_before_check_awaits_ready(self) -> None:
+        """Test that before_check waits for the client to be ready."""
+        with patch.object(main.client, "wait_until_ready", new_callable=AsyncMock) as mock_wait:
+            await main.before_check()
+            mock_wait.assert_awaited_once()
+
     @patch("main.DISCORD_CHANNEL_ID", None)
     @patch("main.get_latest_releases", new_callable=AsyncMock)
     async def test_skips_when_channel_id_not_set(self, mock_get_releases) -> None:
