@@ -4,7 +4,7 @@ import asyncio
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from scraper_interface import Release, get_latest_release, get_latest_releases
+from scraper_interface import Release, get_latest_releases
 
 
 class TestScraperInterface(unittest.TestCase):
@@ -15,30 +15,6 @@ class TestScraperInterface(unittest.TestCase):
         release = Release(title="Test Release", url="https://example.com")
         self.assertEqual(release.title, "Test Release")
         self.assertEqual(release.url, "https://example.com")
-
-    @patch("scraper_interface._backend")
-    def test_get_latest_release_success(self, mock_backend: AsyncMock) -> None:
-        """Test get_latest_release returns release successfully."""
-        mock_backend.get_latest_release = AsyncMock(
-            return_value={"title": "Test Release", "url": "https://test.com", "tag": ""}
-        )
-
-        result = asyncio.run(get_latest_release())
-
-        mock_backend.get_latest_release.assert_called_once()
-        self.assertIsNotNone(result)
-        if result is not None:
-            self.assertEqual(result.title, "Test Release")
-            self.assertEqual(result.url, "https://test.com")
-
-    @patch("scraper_interface._backend")
-    def test_get_latest_release_handles_exception(self, mock_backend: AsyncMock) -> None:
-        """Test get_latest_release handles exceptions gracefully."""
-        mock_backend.get_latest_release = AsyncMock(side_effect=Exception("Backend error"))
-
-        result = asyncio.run(get_latest_release())
-
-        self.assertIsNone(result)
 
     @patch("scraper_interface._backend")
     def test_get_latest_releases_returns_list(self, mock_backend) -> None:
