@@ -42,7 +42,7 @@ client = AnnouncerClient(intents=intents)
 # --- Helper Functions ---
 def format_release_message(release: Release) -> str:
     """Formats the release information into a Discord message."""
-    title = release.title
+    title = discord.utils.escape_markdown(release.title).replace("[", r"\[").replace("]", r"\]")
     url = release.url
 
     platform_emoji = "🔧"  # Default emoji

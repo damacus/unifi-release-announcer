@@ -71,6 +71,14 @@ class TestMain(unittest.TestCase):
         message = format_release_message(release)
         self.assertTrue(message.endswith("💻"))
 
+    def test_format_release_message_sanitizes_markdown(self) -> None:
+        """Test that markdown injection characters like brackets are sanitized."""
+        release = Release(title="UniFi Network [Application] 8.0.28 (Beta) *Test*", url="https://example.com/app")
+        message = format_release_message(release)
+        self.assertIn(r"\[Application\]", message)
+        self.assertIn(r"\*Test\*", message)
+        self.assertIn("https://example.com/app", message)
+
 
 def _make_async_iter(items):
     """Return an object that supports 'async for' over the given items."""

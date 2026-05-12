@@ -203,9 +203,7 @@ class GraphQLBackend:
                 if tag not in release_tags:
                     continue
                 if not self._is_release_allowed_for_tag(release_title, tag):
-                    logging.debug(
-                        "Filtering out release '%s' for tag '%s'", release_data.get("title"), tag
-                    )
+                    logging.debug("Filtering out release '%s' for tag '%s'", release_data.get("title"), tag)
                     continue
                 existing = releases_by_tag.get(tag)
                 if existing is None or release_data["createdAt"] > existing["createdAt"]:
