@@ -191,13 +191,16 @@ class GraphQLBackend:
     def _process_releases_response(self, all_releases: list[dict], tags: list[str]) -> dict[str, dict]:
         """Filter and group releases by tag, returning the latest for each."""
         releases_by_tag: dict[str, dict] = {}
+        tags_set = set(tags)
         for release_data in all_releases:
             release_tags = release_data.get("tags", [])
+            if not release_tags:
+                continue
+
             release_title = release_data.get("title", "").lower()
 
-            for tag in tags:
-                if tag not in release_tags:
-                    continue
+            common_tags = tags_set.intersection(release_tags)
+            for tag in common_tags:
                 if not self._is_release_allowed_for_tag(release_title, tag):
                     logging.debug("Filtering out release '%s' for tag '%s'", release_data.get("title"), tag)
                     continue
