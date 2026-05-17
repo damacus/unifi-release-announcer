@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.11](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.10...unifi-release-announcer-v0.2.11) (2026-05-17)
+
+
+### Miscellaneous
+
+* **deps:** update actions/create-github-app-token action to v3.2.0 ([#210](https://github.com/damacus/unifi-release-announcer/issues/210)) ([e55714b](https://github.com/damacus/unifi-release-announcer/commit/e55714b296dc077322e53e06808865edba47dd41))
+* **deps:** update ghcr.io/astral-sh/uv:latest docker digest to 1025398 ([#209](https://github.com/damacus/unifi-release-announcer/issues/209)) ([be67054](https://github.com/damacus/unifi-release-announcer/commit/be6705431e494f97a92e16e97641705010115c20))
+* **deps:** update ghcr.io/astral-sh/uv:latest docker digest to 841c8e6 ([#192](https://github.com/damacus/unifi-release-announcer/issues/192)) ([b79c6c8](https://github.com/damacus/unifi-release-announcer/commit/b79c6c86ab5587182e83b06d1f0775e21647d002))
+* **deps:** update mcr.microsoft.com/devcontainers/python:dev-3.13-trixie docker digest to c8c9294 ([#193](https://github.com/damacus/unifi-release-announcer/issues/193)) ([94b2ea3](https://github.com/damacus/unifi-release-announcer/commit/94b2ea37143739bd434b9bdc777e02a404a14391))
+* **deps:** update python:3.14-alpine docker digest to 5a824eb ([#212](https://github.com/damacus/unifi-release-announcer/issues/212)) ([b931c84](https://github.com/damacus/unifi-release-announcer/commit/b931c84b4d5579818ff980764ef6852305cc4010))
+* **deps:** update python:3.14-alpine docker digest to a3de013 ([#202](https://github.com/damacus/unifi-release-announcer/issues/202)) ([f138ded](https://github.com/damacus/unifi-release-announcer/commit/f138dedb60094f90b56125e22978af834fa90c27))
+* **deps:** update step-security/harden-runner action to v2.19.3 ([#211](https://github.com/damacus/unifi-release-announcer/issues/211)) ([a88d0fd](https://github.com/damacus/unifi-release-announcer/commit/a88d0fdc1115e3e5fb4440d4b1107bbdfc9803d3))
+
 ## [0.2.10](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.9...unifi-release-announcer-v0.2.10) (2026-05-06)
 
 
