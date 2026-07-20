@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.13](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.12...unifi-release-announcer-v0.2.13) (2026-07-20)
+
+
+### Miscellaneous
+
+* **deps:** update actions/checkout digest to 3d3c42e ([#247](https://github.com/damacus/unifi-release-announcer/issues/247)) ([e7664df](https://github.com/damacus/unifi-release-announcer/commit/e7664df223818b711b4cd293039345fa8248dbaa))
+
 ## [0.2.12](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.11...unifi-release-announcer-v0.2.12) (2026-06-26)
 
 
