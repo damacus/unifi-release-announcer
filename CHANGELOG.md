@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.13](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.12...unifi-release-announcer-v0.2.13) (2026-08-22)
+
+
+### Miscellaneous
+
+* **deps:** update actions/checkout digest to 3d3c42e ([#247](https://github.com/damacus/unifi-release-announcer/issues/247)) ([e7664df](https://github.com/damacus/unifi-release-announcer/commit/e7664df223818b711b4cd293039345fa8248dbaa))
+* **deps:** update astral-sh/setup-uv action to v10 ([#251](https://github.com/damacus/unifi-release-announcer/issues/251)) ([96deb5b](https://github.com/damacus/unifi-release-announcer/commit/96deb5b2c434e372717f465ea74909d922873bcb))
+* **deps:** update python:3.14-alpine docker digest to 05b2b8b ([#250](https://github.com/damacus/unifi-release-announcer/issues/250)) ([d00bbfb](https://github.com/damacus/unifi-release-announcer/commit/d00bbfbbf602ca9344cfb7d85a1b61178d3cccf9))
+
 ## [0.2.12](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.11...unifi-release-announcer-v0.2.12) (2026-06-26)
 
 
