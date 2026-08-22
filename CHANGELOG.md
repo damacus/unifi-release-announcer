@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.2.14](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.13...unifi-release-announcer-v0.2.14) (2026-08-22)
+
+
+### Miscellaneous
+
+* **deps:** update actions/setup-python action to v7 ([#246](https://github.com/damacus/unifi-release-announcer/issues/246)) ([7e34704](https://github.com/damacus/unifi-release-announcer/commit/7e3470442a219d41ec39952e464869893c3903c6))
+* **deps:** update arduino/setup-task action to v3 ([#233](https://github.com/damacus/unifi-release-announcer/issues/233)) ([9390fa0](https://github.com/damacus/unifi-release-announcer/commit/9390fa0f332c86839facb2027413a131452386c7))
+* **deps:** update docker/build-push-action action to v7.3.0 ([#236](https://github.com/damacus/unifi-release-announcer/issues/236)) ([3a8a9c9](https://github.com/damacus/unifi-release-announcer/commit/3a8a9c929b396d4b547d9e3d3e7edeec7c3eca0c))
+* **deps:** update docker/build-push-action digest to 53b7df9 ([#234](https://github.com/damacus/unifi-release-announcer/issues/234)) ([e7835ee](https://github.com/damacus/unifi-release-announcer/commit/e7835eea1b93da35ef945500cd09ca2ef23ca20e))
+* **deps:** update docker/login-action action to v4.6.0 ([#239](https://github.com/damacus/unifi-release-announcer/issues/239)) ([7aa32c7](https://github.com/damacus/unifi-release-announcer/commit/7aa32c764f7e76c26c9c9a20c20ec3a99d9d7b91))
+* **deps:** update docker/login-action digest to dbcb813 ([#238](https://github.com/damacus/unifi-release-announcer/issues/238)) ([ba99d1b](https://github.com/damacus/unifi-release-announcer/commit/ba99d1b8243bb8e0461aebfaee8aa524eca53416))
+* **deps:** update docker/metadata-action action to v6.2.0 ([#242](https://github.com/damacus/unifi-release-announcer/issues/242)) ([c2875cf](https://github.com/damacus/unifi-release-announcer/commit/c2875cf18e1695f3e472c4c9ca4f431afe081509))
+* **deps:** update docker/metadata-action digest to dc80280 ([#240](https://github.com/damacus/unifi-release-announcer/issues/240)) ([c4d2ef2](https://github.com/damacus/unifi-release-announcer/commit/c4d2ef2894b4390e2ae80f318b3c3d7ce75b9b6c))
+* **deps:** update docker/setup-buildx-action action to v4.3.0 ([#243](https://github.com/damacus/unifi-release-announcer/issues/243)) ([24ceccd](https://github.com/damacus/unifi-release-announcer/commit/24ceccd4490c1becd40bfb9ca78eb60608f5f156))
+* **deps:** update docker/setup-buildx-action digest to 37fe631 ([#241](https://github.com/damacus/unifi-release-announcer/issues/241)) ([eff8be7](https://github.com/damacus/unifi-release-announcer/commit/eff8be7e7a0b15ac92270057d73c06c379a2250e))
+* **deps:** update docker/setup-qemu-action action to v4.2.0 ([#237](https://github.com/damacus/unifi-release-announcer/issues/237)) ([ca7b9e8](https://github.com/damacus/unifi-release-announcer/commit/ca7b9e85463d89c5d63fe5ed9c963d2755cb7af2))
+* **deps:** update mcr.microsoft.com/devcontainers/python:dev-3.13-trixie docker digest to 66df640 ([#232](https://github.com/damacus/unifi-release-announcer/issues/232)) ([d4e363c](https://github.com/damacus/unifi-release-announcer/commit/d4e363cc5f61b450251aa87d1bfc44232b0ea557))
+* **deps:** update step-security/harden-runner action to v2.21.0 ([#245](https://github.com/damacus/unifi-release-announcer/issues/245)) ([80eb409](https://github.com/damacus/unifi-release-announcer/commit/80eb4093260d7840a42e41bc6d2398df40bf49f1))
+
 ## [0.2.13](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.12...unifi-release-announcer-v0.2.13) (2026-08-22)
 
 
