@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/python:dev-3.13-trixie@sha256:66df6401c106a9918e5b826afe77c508b4de787d8f620580a6c093ffa6348e77
+FROM mcr.microsoft.com/devcontainers/python:dev-3.13-trixie@sha256:210362cd8e0ca2d2bfa70d47b37191310887e42b4d553d46207ac0114f4e48c8
 
 # ENV PYTHONDONTWRITEBYTECODE=1
 # ENV PYTHONUNBUFFERED=1
