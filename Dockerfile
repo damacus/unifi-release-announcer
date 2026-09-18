@@ -13,7 +13,7 @@ RUN apk add --no-cache \
     && rm -rf /var/cache/apk/*
 
 # Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest@sha256:b485bd65cc2cf1c9a93b3554012c9c3778cf7b1b5fd3d3096ce9e1226c97e1e6 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:latest@sha256:10787c682e4184e4f290de1171fd4703dc63de99221f10fe1c99002ce7fa9acc /uv /uvx /bin/
 
 # Create virtual environment and install dependencies
 COPY pyproject.toml uv.lock ./
