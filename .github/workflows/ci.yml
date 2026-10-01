@@ -46,13 +46,13 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Install mdBook
+      - name: Install uv
         uses: jdx/mise-action@v4
         with:
-          install_args: mdbook
+          install_args: uv
 
       - name: Build documentation
-        run: mdbook build
+        run: uv run --locked --python 3.14 zensical build
 
       - name: Validate OpenSpec
         run: npx --yes @fission-ai/openspec@1.13.2 validate migrate-announcer-to-rust --strict

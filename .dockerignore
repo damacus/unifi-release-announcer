@@ -3,5 +3,6 @@ target
 cache
 .env
 *.env
-book
+site
+.venv
 memory-evidence

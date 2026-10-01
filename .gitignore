@@ -3,4 +3,5 @@
 /cache/
 *.env
 /memory-evidence/
-/book/
+/site/
+/.venv/

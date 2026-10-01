@@ -37,5 +37,5 @@
 
 ## 7. Remove the legacy toolchain
 
-- [x] 7.1 Remove Python source, tests, dependencies and fixture generator; retain captured JSON fixtures and Git history.
-- [x] 7.2 Replace the memory sampler with Rust and documentation with mdBook; verify regression tests, documentation build and workflow lint.
+- [x] 7.1 Remove Python application source, tests, dependencies and fixture generator; retain captured JSON fixtures and Git history.
+- [x] 7.2 Replace the memory sampler with Rust and documentation with Zensical in a documentation-only Python environment; verify regression tests, documentation build and workflow lint.

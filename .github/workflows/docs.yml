@@ -5,7 +5,9 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
-      - 'book.toml'
+      - 'zensical.toml'
+      - 'pyproject.toml'
+      - 'uv.lock'
       - '.mise.toml'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
@@ -18,14 +20,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Install mdBook
+      - name: Install uv
         uses: jdx/mise-action@v4
         with:
-          install_args: mdbook
+          install_args: uv
       - name: Build documentation
-        run: mdbook build
+        run: uv run --locked --python 3.14 zensical build
       - name: Deploy documentation
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./book
+          publish_dir: ./site

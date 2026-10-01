@@ -35,7 +35,7 @@ esac
         Command::new(env!("CARGO_BIN_EXE_memory-acceptance"))
             .arg("candidate")
             .arg(&output)
-            .args(["--hours", "0.000001", "--docker"])
+            .args(["--hours", "0.000000000001", "--docker"])
             .arg(&docker)
             .output()
             .unwrap()

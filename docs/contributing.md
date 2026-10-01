@@ -6,7 +6,7 @@ Use the pinned Rust toolchain and locked dependencies.
 cargo fmt --all --check
 cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked
-mdbook build
+uv run --locked --python 3.14 zensical build
 ```
 
 Captured fixtures in `tests/fixtures/parity.json` preserve the legacy behaviour. The former implementation is available in Git history. Record intentional behaviour changes in OpenSpec and add Rust regression tests; do not silently change fixture expectations to hide a mismatch.

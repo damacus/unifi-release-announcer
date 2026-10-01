@@ -10,6 +10,6 @@ cargo build --locked --release --bins
 
 The executables are `target/release/unifi-release-announcer` and `target/release/release-parser`.
 
-Install the pinned mdBook with `mise install mdbook` to build or serve documentation. Development and operational tooling use Rust.
+Install the pinned uv with `mise install uv`. Documentation uses Zensical and a locked Python environment: `uv run --locked --python 3.14 zensical build`. The application and memory acceptance tooling use Rust.
 
 Use the pinned Rust toolchain locally for development. Production uses UID/GID 1000 and does not require a writable filesystem.
