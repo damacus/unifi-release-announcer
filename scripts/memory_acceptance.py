@@ -10,7 +10,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 def docker(*args):
-    result = subprocess.run(["rtk", "proxy", "docker", *args], capture_output=True, text=True, timeout=30)
+    result = subprocess.run(["docker", *args], capture_output=True, text=True, timeout=30)
     if result.returncode:
         raise RuntimeError("Docker observation failed")
     return result.stdout, result.stderr
@@ -63,7 +63,7 @@ def main():
     if args.hours <= 0:
         parser.error("--hours must be positive")
     args.output.mkdir(parents=True, exist_ok=True)
-    image, _ = docker("inspect", "--format", "{{.Image}}", args.container)
+    image = None
     started = time.monotonic()
     samples = 0
     peak = idle_peak = 0
@@ -71,6 +71,7 @@ def main():
     successful_polls = set()
     with (args.output / "samples.ndjson").open("x") as evidence:
         try:
+            image, _ = docker("inspect", "--format", "{{.Image}}", args.container)
             while True:
                 observed = sample(args.container)
                 observed["elapsed_seconds"] = time.monotonic() - started
@@ -91,12 +92,12 @@ def main():
                 if observed["elapsed_seconds"] >= args.hours * 3600:
                     break
                 time.sleep(15)
-        except (RuntimeError, subprocess.TimeoutExpired, ValueError, KeyError) as error:
+        except (OSError, RuntimeError, subprocess.TimeoutExpired, ValueError, KeyError) as error:
             failures.append(str(error))
     elapsed = time.monotonic() - started
     passed = (not failures and elapsed >= 86400 and idle_peak > 0 and len(successful_polls) >= 140)
     summary = {
-        "container": args.container, "image_id": image.strip(), "duration_seconds": elapsed,
+        "container": args.container, "image_id": image.strip() if image else None, "duration_seconds": elapsed,
         "samples": samples, "successful_polls": len(successful_polls),
         "idle_peak_bytes": idle_peak, "peak_bytes": peak, "failures": failures,
         "passed_24h_gate": passed,

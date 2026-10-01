@@ -36,3 +36,5 @@ Revert the image change through GitOps, retaining Recreate, secrets and the PVC.
 Archive the OpenSpec change only after production acceptance.
 
 The production Kubernetes manifests live in the home-ops GitOps repository at kubernetes/apps/default/unifi-release-announcer. Make rollout changes there; this application repository has no separate kubectl deployment examples.
+
+The release workflow runs the full reusable CI suite against the exact release tag before publishing its image. The local 24-hour memory evidence remains a separate migration gate: complete it before merging the runtime migration or beginning the GitOps rollout. The memory sampler requires Python and Docker, with no RTK prerequisite.

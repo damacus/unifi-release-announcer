@@ -1,4 +1,65 @@
 {
+  "mixed_items": [
+    {
+      "id": "unrelated",
+      "title": "UniFi Network Application",
+      "tags": [
+        "unifi-network"
+      ],
+      "version": null
+    },
+    {
+      "id": "a",
+      "title": "UniFi Protect Application",
+      "version": "6.0",
+      "createdAt": "2026-09-01T10:00:00Z",
+      "tags": [
+        "unifi-protect"
+      ],
+      "slug": "release-a",
+      "stage": "GA"
+    }
+  ],
+  "mixed_releases": [
+    {
+      "title": "UniFi Protect Application 6.0 (GA)",
+      "url": "https://community.ui.com/releases/release-a/a",
+      "tag": "unifi-protect"
+    }
+  ],
+  "unicode_items": [
+    {
+      "id": "a",
+      "title": "Café — 網絡 💻",
+      "version": "6.0",
+      "createdAt": "2026-09-01T10:00:00Z",
+      "tags": [
+        "unifi-protect"
+      ],
+      "slug": "café",
+      "stage": "GA",
+      "stats": {
+        "views": 1,
+        "说明": "你好"
+      }
+    },
+    {
+      "id": "a",
+      "title": "Control  and é",
+      "version": "6.0",
+      "createdAt": "2026-09-01T10:00:00Z",
+      "tags": [
+        "unifi-protect"
+      ],
+      "slug": "release-a",
+      "stage": "GA",
+      "stats": {
+        "z": 1,
+        "a": 2
+      }
+    }
+  ],
+  "unicode_parser_stdout": "{\n  \"title\": \"Caf\\u00e9 \\u2014 \\u7db2\\u7d61 \\ud83d\\udcbb\",\n  \"slug\": \"caf\\u00e9\",\n  \"url\": \"https://community.ui.com/releases/caf\\u00e9\",\n  \"tags\": [\n    \"unifi-protect\"\n  ],\n  \"stage\": \"GA\",\n  \"version\": \"6.0\",\n  \"created_at\": \"2026-09-01T10:00:00Z\",\n  \"created_date\": \"2026-09-01\",\n  \"stats\": {\n    \"views\": 1,\n    \"\\u8bf4\\u660e\": \"\\u4f60\\u597d\"\n  },\n  \"has_engagement\": false\n}\n{\n  \"title\": \"Control \\u007f and \\u00e9\",\n  \"slug\": \"release-a\",\n  \"url\": \"https://community.ui.com/releases/release-a\",\n  \"tags\": [\n    \"unifi-protect\"\n  ],\n  \"stage\": \"GA\",\n  \"version\": \"6.0\",\n  \"created_at\": \"2026-09-01T10:00:00Z\",\n  \"created_date\": \"2026-09-01\",\n  \"stats\": {\n    \"z\": 1,\n    \"a\": 2\n  },\n  \"has_engagement\": false\n}\n",
   "items": [
     {
       "id": "a",

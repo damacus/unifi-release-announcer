@@ -162,16 +162,22 @@ impl DiscordHttp {
         })?
         .map_err(safe_error)?;
         tracing::info!(message_id = %sent.id, "verification message sent");
-        let check = self
-            .http
-            .get_message(self.channel_id, sent.id)
-            .await
-            .map_err(safe_error);
-        let cleanup = self
-            .http
-            .delete_message(self.channel_id, sent.id, None)
-            .await
-            .map_err(safe_error);
+        // Keep a separate cleanup budget even if read-back fails or times out.
+        // Three bounded stages cap the complete lifecycle at 90 seconds.
+        let check = tokio::time::timeout(
+            Duration::from_secs(30),
+            self.http.get_message(self.channel_id, sent.id),
+        )
+        .await
+        .map_err(|_| anyhow::anyhow!("verification read-back timed out"))
+        .and_then(|result| result.map_err(safe_error));
+        let cleanup = tokio::time::timeout(
+            Duration::from_secs(30),
+            self.http.delete_message(self.channel_id, sent.id, None),
+        )
+        .await
+        .map_err(|_| anyhow::anyhow!("verification cleanup timed out; remove message {}", sent.id))
+        .and_then(|result| result.map_err(safe_error));
         cleanup?;
         let check = check?;
         if check.content != message["content"].as_str().unwrap_or_default() {

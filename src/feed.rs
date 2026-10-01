@@ -76,9 +76,24 @@ impl GraphQl {
         let data = self.request(&feed_payload(tags)).await?;
         let items = data
             .pointer("/data/releases/items")
-            .context("missing release items")?;
-        let items: Vec<RawRelease> =
-            serde_json::from_value(items.clone()).context("invalid release items")?;
+            .and_then(Value::as_array)
+            .context("missing or invalid release items")?;
+        let items: Vec<RawRelease> = items
+            .iter()
+            .filter(|item| {
+                item.get("tags")
+                    .and_then(Value::as_array)
+                    .is_some_and(|item_tags| {
+                        item_tags.iter().any(|tag| {
+                            tag.as_str()
+                                .is_some_and(|tag| tags.iter().any(|configured| configured == tag))
+                        })
+                    })
+            })
+            .map(|item| {
+                serde_json::from_value(item.clone()).context("invalid configured release item")
+            })
+            .collect::<Result<_>>()?;
         Ok(select_latest(&items, tags))
     }
     pub async fn details(&self, id: &str) -> Result<Option<Value>> {

@@ -20,7 +20,17 @@ for title in titles:
     release = Release(title, "https://community.ui.com/releases/example/id", "unifi-network")
     formats.append({"release": release.__dict__, "message": format_release_message(release)})
 parsed = [parse_release(raw) for raw in items]
+mixed_items = [{"id": "unrelated", "title": "UniFi Network Application", "tags": ["unifi-network"], "version": None}, items[0]]
+mixed_selected = backend._process_releases_response(mixed_items, ["unifi-protect"])
+mixed_releases = [backend._format_release_dict(tag, raw) for tag, raw in mixed_selected.items()]
+unicode_items = [
+    {**items[0], "title": "Café — 網絡 💻", "slug": "café", "stats": {"views": 1, "说明": "你好"}},
+    {**items[0], "title": "Control \u007f and é", "stats": {"z": 1, "a": 2}},
+]
 data = {
+    "mixed_items": mixed_items, "mixed_releases": mixed_releases,
+    "unicode_items": unicode_items,
+    "unicode_parser_stdout": "".join(json.dumps(parse_release(raw), indent=2) + "\n" for raw in unicode_items),
     "items": items, "tags": tags, "releases": releases, "formats": formats,
     "payload": backend._build_latest_releases_payload(tags),
     "parsed": parsed,

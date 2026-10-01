@@ -37,3 +37,7 @@ Land independently verifiable source changes in order. Validate both container a
 ## Runtime image and update automation
 
 Build static musl binaries using the digest-pinned Rust Alpine builder, then copy only the two binaries into scratch. Run as UID 1000. Verify both supported architectures and enforce a 32 MiB uncompressed image limit in CI. A dedicated Rust job runs fmt, Clippy, tests and release builds. Renovate minor updates require passing CI through the existing main ruleset; its required build-and-push check now waits for Rust tests and both container checks and at least 24 hours since release; missing release timestamps stay pending. Major and unaged update types remain manual. Restart local memory acceptance when changing the runtime image.
+
+## Review corrections
+
+Filter GraphQL items to configured tags before validating release fields, so unrelated incomplete items cannot block announcements. Preserve JSON field insertion order and Python ASCII escaping in parser output. Observe Docker directly from the portable memory sampler and record startup failures. Live verification reserves separate 30-second send, read and cleanup budgets. Release image publishing depends on the complete reusable CI checks for the exact release tag; local 24-hour memory evidence is required before merging the migration and deployment.

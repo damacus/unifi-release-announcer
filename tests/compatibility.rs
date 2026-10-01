@@ -79,3 +79,25 @@ fn parser_cli_matches_python() {
     let actual: Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(actual, f["parser_filtered"][0]);
 }
+
+#[test]
+fn unicode_parser_cli_matches_python_byte_for_byte() {
+    let f = fixture();
+    let input =
+        std::env::temp_dir().join(format!("unifi-parser-unicode-{}.json", std::process::id()));
+    std::fs::write(
+        &input,
+        json!({"data":{"releases":{"items":f["unicode_items"]}}}).to_string(),
+    )
+    .unwrap();
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_release-parser"))
+        .arg(&input)
+        .output()
+        .unwrap();
+    std::fs::remove_file(input).unwrap();
+    assert!(output.status.success());
+    assert_eq!(
+        String::from_utf8(output.stdout).unwrap(),
+        f["unicode_parser_stdout"].as_str().unwrap()
+    );
+}

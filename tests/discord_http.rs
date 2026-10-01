@@ -202,3 +202,54 @@ async fn oversized_message_never_posts() {
     assert_eq!(client(&server).post(&release).await, PostOutcome::Rejected);
     assert!(server.received_requests().await.unwrap().is_empty());
 }
+
+#[tokio::test]
+async fn verification_reads_and_deletes_only_its_returned_message() {
+    let server = MockServer::start().await;
+    let content = "[Rust migration verification — no release announcement]";
+    Mock::given(method("POST"))
+        .and(path("/api/v10/channels/10/messages"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(message(50, content)))
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/api/v10/channels/10/messages/50"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(message(50, content)))
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(method("DELETE"))
+        .and(path("/api/v10/channels/10/messages/50"))
+        .respond_with(ResponseTemplate::new(204))
+        .expect(1)
+        .mount(&server)
+        .await;
+    client(&server).verification_message().await.unwrap();
+}
+
+#[tokio::test]
+async fn verification_attempts_cleanup_when_read_back_fails() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/api/v10/channels/10/messages"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(message(50, "verification")))
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/api/v10/channels/10/messages/50"))
+        .respond_with(
+            ResponseTemplate::new(500).set_body_json(json!({"code":0,"message":"failed"})),
+        )
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(method("DELETE"))
+        .and(path("/api/v10/channels/10/messages/50"))
+        .respond_with(ResponseTemplate::new(204))
+        .expect(1)
+        .mount(&server)
+        .await;
+    assert!(client(&server).verification_message().await.is_err());
+}

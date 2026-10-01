@@ -26,3 +26,5 @@ cargo test --locked --test discord_live -- --ignored
 ```
 
 Use conventional commits. Keep credentials and memory evidence outside Git. Production deployment remains gated on the complete memory test and GitOps checks.
+
+Live verification bounds send, read-back and deletion to 30 seconds each (90 seconds total). Cleanup retains its own budget after a failed read. A cleanup timeout reports the exact returned message ID for manual removal.
