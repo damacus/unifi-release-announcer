@@ -1,8 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>damacus/renovate-config",
-    "local>damacus/renovate-config:autoMergeGitHubActions.json5"
+    "local>damacus/renovate-config"
   ],
   "packageRules": [
     {
@@ -51,6 +50,38 @@
         "lockFileMaintenance",
         "rollback",
         "replacement"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Keep actions on floating major tags",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "pinDigests": false,
+      "rangeStrategy": "replace"
+    },
+    {
+      "description": "Only propose major upgrades for actions",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Review action major upgrades manually",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "major"
       ],
       "automerge": false
     }
