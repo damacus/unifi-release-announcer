@@ -1,0 +1,30 @@
+[package]
+name = "unifi-release-announcer"
+version = "0.2.14"
+edition = "2024"
+rust-version = "1.98"
+license = "MIT"
+description = "HTTP-only UniFi release announcements for Discord"
+default-run = "unifi-release-announcer"
+
+[dependencies]
+anyhow = "1"
+chrono = { version = "0.4", default-features = false, features = ["std", "serde"] }
+clap = { version = "4", features = ["derive"] }
+regex = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+serenity = { version = "0.12", default-features = false, features = ["builder", "http", "model", "rustls_backend"] }
+tokio = { version = "1", features = ["rt", "macros", "time", "signal", "process"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+[dev-dependencies]
+wiremock = "0.6"
+
+[profile.release]
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+strip = true

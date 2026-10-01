@@ -1,28 +1,10 @@
----
 services:
   announcer:
     build: .
-    environment:
-      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
-      - DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
-      - SCRAPER_BACKEND=${SCRAPER_BACKEND:-graphql}
-      - TAGS=${TAGS:-unifi-protect,unifi-network}
     env_file: [.env]
-
-  dev:
-    build:
-      context: .
-      dockerfile: .devcontainer/Dockerfile
-    command: sleep infinity
     environment:
-      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
-      - DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
-      - SCRAPER_BACKEND=${SCRAPER_BACKEND:-graphql}
-      - TAGS=${TAGS:-unifi-protect,unifi-network}
-    env_file: [.env]
-    volumes:
-      - .:/app
-      - dev_venv:/app/.venv
-
-volumes:
-  dev_venv:
+      TAGS: "${TAGS:-unifi-protect,unifi-network}"
+    restart: unless-stopped
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    read_only: true

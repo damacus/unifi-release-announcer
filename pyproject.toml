@@ -1,59 +1,8 @@
 [project]
-name = "unifi-release-announcer"
-version = "0.2.14"
-description = "Discord bot that announces new UniFi releases"
-authors = [
-    {name = "damacus"}
-]
-requires-python = ">=3.13"
-dependencies = [
-    "discord.py",
-    "aiohttp>=3.9.0",
-]
+name = "unifi-release-announcer-docs"
+version = "0.0.0"
+requires-python = ">=3.14"
+dependencies = ["zensical>=0.0.67,<0.1"]
 
-[project.optional-dependencies]
-dev = [
-    "pytest",
-    "pytest-cov",
-    "mypy",
-    "ruff",
-    "respx",
-    "pytest-asyncio",
-    "mkdocs",
-    "mkdocs-material",
-    "mutmut",
-]
-
-[tool.ruff]
-line-length = 120
-target-version = "py313"
-cache-dir = ".ruff_cache"
-
-[tool.ruff.lint]
-select = ["E", "F", "W", "I", "N", "UP", "S", "B", "A", "C4", "T20"]
-ignore = []
-
-[tool.setuptools.packages.find]
-where = ["./"]
-
-[tool.mypy]
-python_version = "3.13"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-cache_dir = ".mypy_cache"
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-addopts = "-v --tb=short"
-cache_dir = ".pytest_cache"
-pythonpath = ["."]
-
-[tool.mutmut]
-paths_to_mutate = ["main.py", "scraper_interface.py", "scraper_backends/graphql_backend.py"]
-tests_dir = "tests"
-
-[project.scripts]
-test = "pytest"
-test-all = "pytest -v"
+[tool.uv]
+package = false

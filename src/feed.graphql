@@ -1,0 +1,38 @@
+query ReleaseFeedListQuery(
+            $tags: [String!],
+            $betas: [String!],
+            $alphas: [String!],
+            $offset: Int,
+            $limit: Int,
+            $sortBy: ReleasesSortBy,
+            $userIsFollowing: Boolean,
+            $featuredOnly: Boolean,
+            $searchTerm: String,
+            $filterTags: [String!],
+            $filterEATags: [String!],
+            $statuses: [ReleaseStatus!]
+        ) {
+          releases(
+            tags: $tags
+            betas: $betas
+            alphas: $alphas
+            offset: $offset
+            limit: $limit
+            sortBy: $sortBy
+            userIsFollowing: $userIsFollowing
+            featuredOnly: $featuredOnly
+            searchTerm: $searchTerm
+            filterTags: $filterTags
+            filterEATags: $filterEATags
+            statuses: $statuses
+          ) {
+            items {
+              id
+              title
+              version
+              slug
+              createdAt
+              tags
+            }
+          }
+        }

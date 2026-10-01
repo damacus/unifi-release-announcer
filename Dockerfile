@@ -1,48 +1,16 @@
-# Multi-stage build for minimal final image
-FROM python:3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc AS builder
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
+# syntax=docker/dockerfile:1
+FROM rust:1.98.1-alpine@sha256:7cc1c22d77d9432f7fe012a70e6d3e555af54c2a6832700ed7d553f1769ae89f AS builder
+RUN apk add --no-cache musl-dev
 WORKDIR /app
+COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
+COPY src/ src/
+# An explicit target keeps static CRT flags away from host procedural macros.
+RUN rust_target="$(rustc -vV | sed -n 's/^host: //p')" \
+    && RUSTFLAGS="-C target-feature=+crt-static" cargo build --release --locked --bin unifi-release-announcer --bin release-parser --target "$rust_target" \
+    && mkdir /out \
+    && cp "target/$rust_target/release/unifi-release-announcer" "target/$rust_target/release/release-parser" /out/
 
-# Install build dependencies
-RUN apk add --no-cache \
-    build-base \
-    libffi-dev \
-    && rm -rf /var/cache/apk/*
-
-# Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest@sha256:b485bd65cc2cf1c9a93b3554012c9c3778cf7b1b5fd3d3096ce9e1226c97e1e6 /uv /uvx /bin/
-
-# Create virtual environment and install dependencies
-COPY pyproject.toml uv.lock ./
-RUN uv venv && uv sync --no-dev
-
-# Runtime stage
-FROM python:3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc AS runtime
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-WORKDIR /app
-
-# Create a non-root user with explicit UID/GID 1000
-RUN addgroup -S -g 1000 appgroup && \
-    adduser -S -u 1000 appuser -G appgroup
-
-# Copy virtual environment from builder
-COPY --from=builder --chown=appuser:appgroup /app/.venv /app/.venv
-
-# Set the path to include the virtual environment
-ENV PATH="/app/.venv/bin:$PATH"
-
-# Copy application files
-COPY --chown=appuser:appgroup scraper_backends/ /app/scraper_backends/
-COPY --chown=appuser:appgroup main.py /app/main.py
-COPY --chown=appuser:appgroup scraper_interface.py /app/scraper_interface.py
-
-# Switch to non-root user
-USER appuser
-
-CMD ["python", "main.py"]
+FROM scratch AS runtime
+COPY --from=builder /out/ /usr/local/bin/
+USER 1000:1000
+ENTRYPOINT ["/usr/local/bin/unifi-release-announcer"]

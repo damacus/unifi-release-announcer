@@ -1,8 +1,7 @@
-__pycache__
-.mypy_cache
-.pytest_cache
-.venv
-*.egg-info
 .env
-.coverage
-site/
+/target/
+/cache/
+*.env
+/memory-evidence/
+/site/
+/.venv/
