@@ -1,224 +1,36 @@
-# Deployment
+# Deployment and Rust migration
 
-This guide covers different deployment options for the UniFi Release Announcer.
+Deploy one writer. Reuse the existing channel and credentials so previous announcements remain visible to duplicate detection.
 
-## Docker Compose Deployment
+## Acceptance before deployment
 
-The recommended way to run the application in production is using Docker Compose.
+1. Pass Rust tests, Python oracle tests, formatting, Clippy and documentation build.
+2. Build and run non-root amd64 and arm64 images.
+3. Run the explicitly ignored live test in the existing text channel. It posts one labelled verification message, reads it back and deletes only that message.
+4. Run the release container in `--dry-run` for 24 hours with live feed/history and production tags. Sample every 15 seconds using `scripts/memory_acceptance.py`.
+5. Require idle working set <=32 MiB after warm-up and every sample <=64 MiB. Require at least 140 successful polls and no observed poll failures.
+6. Publish and record an immutable image digest. A short smoke test is not the 24-hour gate.
 
-### Prerequisites
+The sampler reads Docker working-set statistics from the host, so it works with the shell-free scratch runtime. Docker subtracts inactive file cache on Linux and rounds its displayed memory values. Docker Desktop must remain running throughout the measurement. Docker observer processes add a small amount of instrumentation overhead. If collection stops, the test fails.
 
-- Docker and Docker Compose installed
-- Discord bot token and channel ID
+## Ironstone GitOps
 
-### Steps
+The source of truth is home-ops `kubernetes/apps/default/unifi-release-announcer/app/HelmRelease.yaml`. Keep existing secret references, tags, PVC, one replica and Recreate strategy. Retain the 100M request/limit for initial cutover.
 
-1. **Clone the repository**:
+Validate rendered manifests with `task k8s:yayamlls`. Keep the deployment PR in draft with auto-merge disabled until the application and memory gates pass.
 
-   ```bash
-   git clone <repository-url>
-   cd unifi-release-announcer
-   ```
+Cluster deployment is the final step. First use an isolated dry-run canary with the existing secret references and tags, then replace the production image through Flux. Never give the canary a write-enabled command.
 
-2. **Create environment file**:
+Verify the exact Flux revision and image digest, one active writer, completed polls, and a controlled restart without reposting existing releases. Repeat the 24-hour memory/error check after cutover.
 
-   Create a `.env` file in the project root:
+## Rollback
 
-   ```env
-   DISCORD_BOT_TOKEN=your_discord_bot_token
-   DISCORD_CHANNEL_ID=your_discord_channel_id
-   SCRAPER_BACKEND=graphql
-   TAGS=unifi-protect,unifi-network
-   ```
+Record the current Python digest before activation. The initial baseline was:
 
-3. **Build the image**:
-
-   Using Taskfile:
-   ```bash
-   task build
-   ```
-
-   Or directly with Docker Compose:
-   ```bash
-   docker compose build announcer
-   ```
-
-4. **Run the service**:
-
-   Using Taskfile:
-   ```bash
-   task docker-run
-   ```
-
-   Or directly with Docker Compose:
-   ```bash
-   docker compose up announcer
-   ```
-
-   To run in detached mode:
-   ```bash
-   docker compose up -d announcer
-   ```
-
-5. **View logs**:
-
-   ```bash
-   docker compose logs -f announcer
-   ```
-
-6. **Stop the service**:
-
-   ```bash
-   docker compose down
-   ```
-
-## Kubernetes Deployment
-
-For production deployments on Kubernetes clusters (including k3s).
-
-### Prerequisites
-
-- A running Kubernetes cluster (e.g., k3s, minikube)
-- `kubectl` configured to connect to your cluster
-- A Docker Hub account or another container registry to host your image
-
-### Steps
-
-#### 1. Build and Push the Docker Image
-
-First, build the Docker image and push it to a container registry. Replace `your-docker-hub-username` with your actual username.
-
-```bash
-# Build the image
-docker build -t your-docker-hub-username/unifi-release-announcer:latest .
-
-# Push the image
-docker push your-docker-hub-username/unifi-release-announcer:latest
+```text
+ghcr.io/damacus/unifi-release-announcer:0.2.14@sha256:19ef75ff3c21473a49e07c91ed19aefa9187cd286b8e595d783eb2148cb4a552
 ```
 
-#### 2. Update the Deployment Image
+Revert the image change through GitOps, retaining Recreate, secrets and the PVC. Confirm the Python pod is healthy and resumes polling. Do not delete state or Discord history.
 
-Modify `k8s/deployment.yaml` to point to the image you just pushed:
-
-```yaml
-# k8s/deployment.yaml
-
-# ...
-containers:
-  - name: unifi-release-announcer
-    # Replace with your actual image path
-    image: your-docker-hub-username/unifi-release-announcer:latest
-# ...
-```
-
-#### 3. Create Your Secrets
-
-Update `k8s/secret.yaml` with your actual Discord bot token and channel ID. 
-
-!!! warning "Security Notice"
-    **Do not commit this file with your secrets to a public repository.**
-
-```yaml
-# k8s/secret.yaml
-
-apiVersion: v1
-kind: Secret
-metadata:
-  name: unifi-release-announcer-secrets
-stringData:
-  DISCORD_BOT_TOKEN: "YOUR_REAL_BOT_TOKEN"
-  DISCORD_CHANNEL_ID: "YOUR_REAL_CHANNEL_ID"
-```
-
-#### 4. Apply the Manifests
-
-Use `kustomize` and `kubectl` to apply the configuration to your cluster.
-
-```bash
-cd k8s
-kubectl apply -k .
-```
-
-#### 5. Verify the Deployment
-
-Check the status of your deployment and view the logs to ensure everything is running correctly.
-
-```bash
-# Check deployment status
-kubectl get deployments
-
-# Check pod status
-kubectl get pods
-
-# View logs from the pod (replace with your pod's name)
-kubectl logs -f <your-pod-name>
-```
-
-#### 6. Update the Deployment
-
-To update the deployment with a new image:
-
-```bash
-# Pull the latest image
-kubectl rollout restart deployment/unifi-release-announcer
-
-# Check rollout status
-kubectl rollout status deployment/unifi-release-announcer
-```
-
-## Development Deployment
-
-For local development, you can use the dev container or run directly with Python.
-
-### Using Dev Container
-
-```bash
-task dev
-```
-
-This starts a development container with all dependencies installed and volume mounts for live code editing.
-
-### Running Locally
-
-```bash
-# Install dependencies
-task dev-install
-
-# Run the application
-task run
-```
-
-## Environment Variables
-
-Make sure to configure the following environment variables for any deployment method:
-
-| Variable             | Description                                                                                                 | Required |
-|----------------------|-------------------------------------------------------------------------------------------------------------|----------|
-| `DISCORD_BOT_TOKEN`  | Your Discord bot token                                                                                      | Yes      |
-| `DISCORD_CHANNEL_ID` | Discord channel ID for announcements                                                                        | Yes      |
-| `SCRAPER_BACKEND`    | Backend to use for scraping: `graphql` (default) or `rss`                                                  | No       |
-| `TAGS`               | Comma-separated list of UniFi product tags to monitor (e.g., "unifi-protect,unifi-network"). Defaults to "unifi-protect" if not set. | No       |
-
-## Persistent Storage
-
-The application stores state in `/cache/release_state.json` to track which releases have been announced. Make sure this directory is persisted across container restarts:
-
-### Docker Compose
-
-The `docker-compose.yml` already includes a volume mount:
-
-```yaml
-volumes:
-  - ./cache:/cache
-```
-
-### Kubernetes
-
-The Kubernetes deployment uses an `emptyDir` volume by default. For production, consider using a PersistentVolumeClaim:
-
-```yaml
-volumes:
-  - name: cache
-    persistentVolumeClaim:
-      claimName: unifi-release-announcer-cache
-```
+Archive the OpenSpec change only after production acceptance.

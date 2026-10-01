@@ -6,7 +6,26 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
+  rust-test:
+    name: Rust tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Install pinned Rust toolchain
+        run: rustup show
+      - name: Check formatting
+        run: cargo fmt --all --check
+      - name: Clippy
+        run: cargo clippy --locked --all-targets -- -D warnings
+      - name: Test Rust and Python compatibility fixtures
+        run: cargo test --locked --all-targets
+      - name: Build release binaries
+        run: cargo build --release --locked --bins
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -25,15 +44,74 @@ jobs:
       - name: Set up Python
         run: uv python install
 
+      - name: Set up pinned Rust
+        run: rustup show
+
       - name: Install dependencies
         run: task dev-install
 
-      - name: Run tests
-        run: task test
+      - name: Check Python reference
+        run: task test-python
 
+      - name: Check compatibility fixtures
+        run: |
+          task parity
+          git diff --exit-code -- tests/fixtures/parity.json
+
+      - name: Build documentation
+        run: task docs-build
+
+      - name: Validate OpenSpec
+        run: npx --yes @fission-ai/openspec@1.13.2 validate migrate-announcer-to-rust --strict
+
+  build-check:
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    needs: [test, rust-test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a
+      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e
+      - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
+        with:
+          context: .
+          push: false
+          load: true
+          tags: announcer:ci
+          platforms: linux/${{ matrix.arch }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify scratch image execution and size
+        run: |
+          docker run --rm --read-only --cap-drop=ALL announcer:ci --version
+          docker run --rm --read-only --cap-drop=ALL --entrypoint /usr/local/bin/release-parser announcer:ci --help
+          size=$(docker image inspect --format '{{.Size}}' announcer:ci)
+          echo "Runtime image: $size bytes"
+          test "$size" -le 33554432
+
+  # Keep the existing required check name, and run it on PRs as well.
   build-and-push:
+    if: ${{ always() }}
+    needs: [test, rust-test, build-check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm all acceptance checks passed
+        env:
+          REFERENCE_RESULT: ${{ needs.test.result }}
+          RUST_RESULT: ${{ needs.rust-test.result }}
+          IMAGES_RESULT: ${{ needs.build-check.result }}
+        run: |
+          test "$REFERENCE_RESULT" = success
+          test "$RUST_RESULT" = success
+          test "$IMAGES_RESULT" = success
+          echo "Rust tests, compatibility checks and both scratch images passed"
+
+  publish-image:
     if: github.event_name != 'pull_request'
-    needs: test
+    needs: build-and-push
     runs-on: ubuntu-latest
     permissions:
       contents: read

@@ -1,0 +1,28 @@
+query ReleaseDetailQuery($id: ID!) {
+              release(id: $id) {
+                id
+                title
+                slug
+                tags
+                betas
+                alphas
+                stage
+                version
+                createdAt
+                lastActivityAt
+                author {
+                  id
+                  username
+                  isEmployee
+                  avatar {
+                    color
+                    content
+                    image
+                  }
+                }
+                stats {
+                  comments
+                  views
+                }
+              }
+            }

@@ -1,14 +1,11 @@
-# Exclude virtual environment
-.venv/
-
-# Exclude Python cache
-__pycache__/
-*.pyc
-
-# Exclude IDE and local development files
-.idea/
-.vscode/
-
-# Exclude Docker files from the context
-Dockerfile
-.dockerignore
+.git
+.venv
+target
+cache
+.env
+*.env
+__pycache__
+.pytest_cache
+.ruff_cache
+.mypy_cache
+site
