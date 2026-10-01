@@ -34,3 +34,5 @@ ghcr.io/damacus/unifi-release-announcer:0.2.14@sha256:19ef75ff3c21473a49e07c91ed
 Revert the image change through GitOps, retaining Recreate, secrets and the PVC. Confirm the Python pod is healthy and resumes polling. Do not delete state or Discord history.
 
 Archive the OpenSpec change only after production acceptance.
+
+The production Kubernetes manifests live in the home-ops GitOps repository at kubernetes/apps/default/unifi-release-announcer. Make rollout changes there; this application repository has no separate kubectl deployment examples.

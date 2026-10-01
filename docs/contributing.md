@@ -1,12 +1,12 @@
 # Contributing
 
-Use the pinned Rust toolchain and locked dependencies. The development container includes Rust and Python.
+Use the pinned Rust toolchain and locked dependencies.
 
 ```sh
 cargo fmt --all --check
 cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked
-uv run --extra dev python -m pytest -q
+uv run --extra dev python -m unittest discover -s tests -p "test_*.py"
 uv run --extra dev mkdocs build --strict
 ```
 

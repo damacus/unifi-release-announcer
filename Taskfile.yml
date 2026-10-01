@@ -13,7 +13,7 @@ tasks:
     cmds: [cargo test --locked]
   test-python:
     desc: Run preserved Python reference tests
-    cmds: [uv run --extra dev python -m pytest -q]
+    cmds: [uv run --extra dev python -m unittest discover -s tests -p "test_*.py"]
   parity:
     desc: Regenerate synthetic Python reference fixtures
     cmds: [uv run --extra dev python scripts/generate_parity.py]
@@ -33,8 +33,6 @@ tasks:
     cmds: [docker compose build announcer]
   docker-run:
     cmds: [docker compose up announcer]
-  dev:
-    cmds: [docker compose run --rm dev]
   docs-build:
     cmds: [uv run --extra dev mkdocs build --strict]
   docs-serve:

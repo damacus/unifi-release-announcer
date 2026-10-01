@@ -12,4 +12,4 @@ The executables are `target/release/unifi-release-announcer` and `target/release
 
 Python is required only for the compatibility tests and MkDocs documentation. Use `uv sync --extra dev` for those tools.
 
-The development container provides Rust and Python. Production uses UID/GID 1000 and does not require a writable filesystem.
+Use the pinned Rust toolchain locally for development. Production uses UID/GID 1000 and does not require a writable filesystem.

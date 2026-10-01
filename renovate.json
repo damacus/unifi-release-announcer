@@ -6,21 +6,14 @@
   ],
   "packageRules": [
     {
-      "description": "Auto-merge development tooling updates",
+      "description": "Auto-merge documentation tooling updates",
       "matchFileNames": [
         "pyproject.toml",
         "uv.lock"
       ],
       "matchPackageNames": [
         "mkdocs",
-        "mkdocs-material",
-        "mypy",
-        "mutmut",
-        "pytest",
-        "pytest-asyncio",
-        "pytest-cov",
-        "respx",
-        "ruff"
+        "mkdocs-material"
       ],
       "matchUpdateTypes": [
         "minor",
