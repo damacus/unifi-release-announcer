@@ -5,23 +5,6 @@
   ],
   "packageRules": [
     {
-      "description": "Auto-merge documentation tooling updates",
-      "matchFileNames": [
-        "pyproject.toml",
-        "uv.lock"
-      ],
-      "matchPackageNames": [
-        "mkdocs",
-        "mkdocs-material"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "automerge": true,
-      "automergeType": "pr"
-    },
-    {
       "description": "Maintain Cargo dependencies and lockfile",
       "matchManagers": [
         "cargo"

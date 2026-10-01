@@ -34,3 +34,8 @@
 - [ ] 6.2 Replace production through Flux; verify exact revision/digest and one writer.
 - [ ] 6.3 Restart once and observe for 24 hours; verify deduplication, thresholds and no unexplained errors.
 - [ ] 6.4 Archive only after production acceptance; verify OpenSpec archival or rollback to Python on failure.
+
+## 7. Remove the legacy toolchain
+
+- [x] 7.1 Remove Python source, tests, dependencies and fixture generator; retain captured JSON fixtures and Git history.
+- [x] 7.2 Replace the memory sampler with Rust and documentation with mdBook; verify regression tests, documentation build and workflow lint.

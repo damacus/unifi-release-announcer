@@ -29,10 +29,10 @@ These bounded history windows do not guarantee exactly-once delivery for old ann
 cargo fmt --all --check
 cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked
-uv run --extra dev python -m unittest discover -s tests -p "test_*.py"
+mdbook build
 ```
 
-Python application files are retained as the frozen compatibility oracle. Production containers contain only the statically linked Rust executables.
+Captured compatibility fixtures preserve the legacy behaviour. The former implementation is available in Git history. Documentation uses mdBook; runtime containers contain only the two statically linked Rust executables.
 
 Use `release-parser <json-file> --tags unifi-protect --stage GA --limit 1` to filter a saved GraphQL response. It prints one pretty-printed JSON object per release.
 

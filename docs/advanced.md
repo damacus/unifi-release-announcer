@@ -21,9 +21,9 @@ Tags match with OR semantics. Stage comparison is exact. Zero limit means no lim
 ## Memory acceptance
 
 ```sh
-python3 scripts/memory_acceptance.py unifi-rust-memory /private/tmp/unifi-memory-evidence
+cargo run --release --locked --bin memory-acceptance -- unifi-rust-memory /private/tmp/unifi-memory-evidence
 ```
 
-The script observes an already running Docker container; it does not start or restart the bot. Its default duration is 24 hours. It writes samples.ndjson and summary.json. Shorter runs cannot pass the 24-hour gate.
+The Rust binary observes an already running Docker container; it does not start or restart the bot. Its default duration is 24 hours. It writes samples.ndjson and summary.json. Shorter runs cannot pass the 24-hour gate.
 
 No Redis, JSON state manager or health HTTP server is implemented.

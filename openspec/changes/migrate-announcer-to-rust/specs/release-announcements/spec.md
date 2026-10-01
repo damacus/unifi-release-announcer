@@ -12,7 +12,7 @@ The service SHALL preserve deployed tag validation, application filtering, lates
 #### Scenario: Compatible releases
 - **GIVEN** the configured UniFi release announcer
 - **WHEN** A feed has applications and accessories for configured tags
-- **THEN** Only the latest eligible application for each tag is selected and its message matches the Python oracle
+- **THEN** Only the latest eligible application for each tag is selected and its message matches the captured compatibility fixtures
 
 ### Requirement: Text and forum delivery
 The service SHALL send text messages or create forum posts with starter messages and no mentions.
@@ -28,4 +28,4 @@ The service SHALL preserve parser fields and tag, stage and limit filtering, and
 #### Scenario: Parser and details
 - **GIVEN** the configured UniFi release announcer
 - **WHEN** A fixture file is parsed with filters
-- **THEN** The output objects match the Python parser
+- **THEN** The output objects match the captured legacy parser fixtures

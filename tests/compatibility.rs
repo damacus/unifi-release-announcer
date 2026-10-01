@@ -8,7 +8,7 @@ fn fixture() -> Value {
     serde_json::from_str(include_str!("fixtures/parity.json")).unwrap()
 }
 #[test]
-fn python_selection_and_formatting() {
+fn reference_selection_and_formatting() {
     let f = fixture();
     let items: Vec<RawRelease> = serde_json::from_value(f["items"].clone()).unwrap();
     let tags: Vec<String> = serde_json::from_value(f["tags"].clone()).unwrap();
@@ -23,7 +23,7 @@ fn python_selection_and_formatting() {
     }
 }
 #[test]
-fn python_graphql_query_and_variables() {
+fn reference_graphql_query_and_variables() {
     let f = fixture();
     let tags: Vec<String> = serde_json::from_value(f["tags"].clone()).unwrap();
     let actual = feed_payload(&tags);
@@ -38,7 +38,7 @@ fn python_graphql_query_and_variables() {
     assert_eq!(normal(&actual["query"]), normal(&f["payload"]["query"]));
 }
 #[test]
-fn python_parser_fields_and_filters() {
+fn reference_parser_fields_and_filters() {
     let f = fixture();
     let feed = json!({"data":{"releases":{"items":f["items"]}}});
     assert_eq!(

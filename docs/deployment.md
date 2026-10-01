@@ -4,10 +4,10 @@ Deploy one writer. Reuse the existing channel and credentials so previous announ
 
 ## Acceptance before deployment
 
-1. Pass Rust tests, Python oracle tests, formatting, Clippy and documentation build.
+1. Pass Rust tests, captured compatibility fixtures, formatting, Clippy and documentation build.
 2. Build and run non-root amd64 and arm64 images.
 3. Run the explicitly ignored live test in the existing text channel. It posts one labelled verification message, reads it back and deletes only that message.
-4. Run the release container in `--dry-run` for 24 hours with live feed/history and production tags. Sample every 15 seconds using `scripts/memory_acceptance.py`.
+4. Run the release container in `--dry-run` for 24 hours with live feed/history and production tags. Sample every 15 seconds using the Rust `memory-acceptance` binary.
 5. Require idle working set <=32 MiB after warm-up and every sample <=64 MiB. Require at least 140 successful polls and no observed poll failures.
 6. Publish and record an immutable image digest. A short smoke test is not the 24-hour gate.
 
@@ -37,4 +37,4 @@ Archive the OpenSpec change only after production acceptance.
 
 The production Kubernetes manifests live in the home-ops GitOps repository at kubernetes/apps/default/unifi-release-announcer. Make rollout changes there; this application repository has no separate kubectl deployment examples.
 
-The release workflow runs the full reusable CI suite against the exact release tag before publishing its image. The local 24-hour memory evidence remains a separate migration gate: complete it before merging the runtime migration or beginning the GitOps rollout. The memory sampler requires Python and Docker, with no RTK prerequisite.
+The release workflow runs the full reusable CI suite against the exact release tag before publishing its image. The local 24-hour memory evidence remains a separate migration gate: complete it before merging the runtime migration or beginning the GitOps rollout. Run the Rust memory sampler with Docker: `cargo run --release --locked --bin memory-acceptance -- CONTAINER EVIDENCE_DIRECTORY`. It rejects container restarts, polling failures and incomplete 24-hour measurements. It refuses to overwrite existing sample evidence.

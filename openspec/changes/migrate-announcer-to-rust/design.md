@@ -19,7 +19,7 @@ Discord history remains authoritative across restarts. Read 200 text messages us
 
 Normal invocation polls immediately, then every ten minutes with skipped missed ticks. --once performs one poll; --dry-run prints JSON decisions without sending. All calls are bounded; SIGTERM/SIGINT allows up to 30 seconds for an in-flight operation before cancellation.
 
-Preserve parser filters, field names and pretty-printed JSON objects. Port the detail query as a library method. Python remains only the compatibility oracle and documentation toolchain.
+Preserve parser filters, field names and pretty-printed JSON objects. Port the detail query as a library method. Remove the former source and tooling; Git history retains the reference implementation. Captured fixtures verify compatibility, mdBook builds documentation, and a Rust binary collects memory acceptance evidence.
 
 ## Risks / Trade-offs
 

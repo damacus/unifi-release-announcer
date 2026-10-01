@@ -10,6 +10,6 @@ cargo build --locked --release --bins
 
 The executables are `target/release/unifi-release-announcer` and `target/release/release-parser`.
 
-Python is required only for the compatibility tests and MkDocs documentation. Use `uv sync --extra dev` for those tools.
+Install the pinned mdBook with `mise install mdbook` to build or serve documentation. Development and operational tooling use Rust.
 
 Use the pinned Rust toolchain locally for development. Production uses UID/GID 1000 and does not require a writable filesystem.

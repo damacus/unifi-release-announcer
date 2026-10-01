@@ -1,0 +1,12 @@
+[book]
+title = "UniFi Release Announcer"
+authors = ["Dan Webb"]
+language = "en"
+src = "docs"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/damacus/unifi-release-announcer"

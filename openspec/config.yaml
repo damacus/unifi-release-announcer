@@ -2,7 +2,7 @@ schema: spec-driven
 context: |
   HTTP-only Rust migration of deployed Python 0.2.14. Ironstone default namespace.
   Preserve external configuration, GraphQL selection, Markdown escaping and Discord history.
-  Use non-root amd64/arm64 containers. Keep the Python source as a test oracle.
+  Use non-root amd64/arm64 containers. Keep captured compatibility fixtures; the former implementation is in Git history.
   Deployment is last and requires 24 hours of <=32 MiB idle and <=64 MiB peak working-set memory.
   Never print credentials or commit live messages. One writer; Flux Recreate rollout.
 rules:

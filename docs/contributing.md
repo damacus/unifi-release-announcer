@@ -6,18 +6,10 @@ Use the pinned Rust toolchain and locked dependencies.
 cargo fmt --all --check
 cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked
-uv run --extra dev python -m unittest discover -s tests -p "test_*.py"
-uv run --extra dev mkdocs build --strict
+mdbook build
 ```
 
-Python 0.2.14 code is the frozen compatibility reference. Synthetic fixtures are generated with:
-
-```sh
-uv run --extra dev python scripts/generate_parity.py
-git diff --exit-code -- tests/fixtures/parity.json
-```
-
-Do not change the oracle to make a Rust mismatch disappear. Record intentional behaviour changes in the OpenSpec change and add tests.
+Captured fixtures in `tests/fixtures/parity.json` preserve the legacy behaviour. The former implementation is available in Git history. Record intentional behaviour changes in OpenSpec and add Rust regression tests; do not silently change fixture expectations to hide a mismatch.
 
 Normal tests use mocked HTTP servers. The ignored `discord_live` test writes one labelled message to the explicitly configured existing channel, reads it back, then removes only its own message. Run it only for authorised live validation.
 

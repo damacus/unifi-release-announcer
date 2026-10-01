@@ -15,4 +15,4 @@ unifi-release-announcer [--once] [--dry-run]
 release-parser <json-file> [--tags tag1,tag2] [--stage GA] [--limit N]
 ```
 
-There is no public HTTP server or Gateway event interface. Python imports are retained only for oracle tests.
+There is no public HTTP server or Gateway event interface. Captured fixtures test compatibility; the former implementation is available in Git history.

@@ -6,7 +6,7 @@ COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
 COPY src/ src/
 # An explicit target keeps static CRT flags away from host procedural macros.
 RUN rust_target="$(rustc -vV | sed -n 's/^host: //p')" \
-    && RUSTFLAGS="-C target-feature=+crt-static" cargo build --release --locked --bins --target "$rust_target" \
+    && RUSTFLAGS="-C target-feature=+crt-static" cargo build --release --locked --bin unifi-release-announcer --bin release-parser --target "$rust_target" \
     && mkdir /out \
     && cp "target/$rust_target/release/unifi-release-announcer" "target/$rust_target/release/release-parser" /out/
 

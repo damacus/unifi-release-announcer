@@ -5,24 +5,15 @@ tasks:
   install:
     desc: Fetch locked Rust dependencies
     cmds: [cargo fetch --locked]
-  dev-install:
-    desc: Install Rust and Python compatibility dependencies
-    cmds: [cargo fetch --locked, uv sync --extra dev]
   test:
     desc: Run Rust tests
     cmds: [cargo test --locked]
-  test-python:
-    desc: Run preserved Python reference tests
-    cmds: [uv run --extra dev python -m unittest discover -s tests -p "test_*.py"]
-  parity:
-    desc: Regenerate synthetic Python reference fixtures
-    cmds: [uv run --extra dev python scripts/generate_parity.py]
   lint:
     cmds: [cargo clippy --locked --all-targets -- -D warnings]
   format:
     cmds: [cargo fmt --all]
   check:
-    cmds: [cargo fmt --all --check, task lint, task test, task test-python]
+    cmds: [cargo fmt --all --check, task lint, task test]
   ci:
     cmds: [task check]
   run:
@@ -34,6 +25,6 @@ tasks:
   docker-run:
     cmds: [docker compose up announcer]
   docs-build:
-    cmds: [uv run --extra dev mkdocs build --strict]
+    cmds: [mdbook build]
   docs-serve:
-    cmds: [uv run --extra dev mkdocs serve]
+    cmds: [mdbook serve]
