@@ -1,4 +1,4 @@
 [tools]
-rust = "1.98.1"
+rust = "1.99.0"
 "npm:@fission-ai/openspec" = "1.14.0"
 uv = "0.12.21"
