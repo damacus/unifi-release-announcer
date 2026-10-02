@@ -12,7 +12,11 @@ anyhow = "1"
 chrono = { version = "0.4", default-features = false, features = ["std", "serde"] }
 clap = { version = "4", features = ["derive"] }
 regex = "1"
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.13.5", default-features = false, features = ["json", "rustls-no-provider"] }
+# Serenity 0.12 requires a Reqwest 0.12 client. Remove this alias when Serenity upgrades.
+reqwest-discord = { package = "reqwest", version = "0.12", default-features = false, features = ["rustls-tls"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+webpki-roots = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 serenity = { version = "0.12", default-features = false, features = ["builder", "http", "model", "rustls_backend"] }

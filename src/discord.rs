@@ -44,9 +44,9 @@ impl DiscordHttp {
         Self::with_proxy(token, channel_id, None)
     }
     pub fn with_proxy(token: &str, channel_id: u64, proxy: Option<&str>) -> Result<Self> {
-        let client = reqwest::Client::builder()
+        let client = reqwest_discord::Client::builder()
             .timeout(Duration::from_secs(30))
-            .redirect(reqwest::redirect::Policy::none())
+            .redirect(reqwest_discord::redirect::Policy::none())
             .build()?;
         let mut builder = HttpBuilder::new(token).client(client);
         if let Some(proxy) = proxy {

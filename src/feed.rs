@@ -45,7 +45,17 @@ impl GraphQl {
         Self::with_url("https://community.svc.ui.com/")
     }
     pub fn with_url(url: &str) -> Result<Self> {
+        // Scratch has no OS certificate store. Retain bundled Mozilla roots and ring.
+        let roots =
+            rustls::RootCertStore::from_iter(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
+        let tls = rustls::ClientConfig::builder_with_provider(std::sync::Arc::new(
+            rustls::crypto::ring::default_provider(),
+        ))
+        .with_safe_default_protocol_versions()?
+        .with_root_certificates(roots)
+        .with_no_client_auth();
         let client = Client::builder()
+            .tls_backend_preconfigured(tls)
             .timeout(Duration::from_secs(30))
             .redirect(reqwest::redirect::Policy::none())
             .build()?;
