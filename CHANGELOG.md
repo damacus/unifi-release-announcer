@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.3.1](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.3.0...unifi-release-announcer-v0.3.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* **deps:** update rust crate anyhow to 1.0.104 ([#269](https://github.com/damacus/unifi-release-announcer/issues/269)) ([52337be](https://github.com/damacus/unifi-release-announcer/commit/52337be5d02d5a359c5e1949a8a2fb50be40ddd5))
+* **deps:** update rust crate chrono to 0.4.45 ([#270](https://github.com/damacus/unifi-release-announcer/issues/270)) ([b9b5127](https://github.com/damacus/unifi-release-announcer/commit/b9b51275ef37abd99fc1999035ad9628729e1d34))
+* **deps:** update rust crate clap to 4.6.7 ([#271](https://github.com/damacus/unifi-release-announcer/issues/271)) ([ebdbc75](https://github.com/damacus/unifi-release-announcer/commit/ebdbc75e4820f80b64771db995c05f60b4f86754))
+* **deps:** update rust crate regex to 1.13.1 ([#272](https://github.com/damacus/unifi-release-announcer/issues/272)) ([e6e7c59](https://github.com/damacus/unifi-release-announcer/commit/e6e7c59d0b2498cde1bc677d947b6519e2d3dee2))
+* **deps:** update rust crate serde to 1.0.229 ([#273](https://github.com/damacus/unifi-release-announcer/issues/273)) ([0bc5bbb](https://github.com/damacus/unifi-release-announcer/commit/0bc5bbb0cc3b8a36ba6a1411c285077b949a637c))
+
+
+### Miscellaneous
+
+* **deps:** update dependency npm:@fission-ai/openspec to v1.14.0 ([#278](https://github.com/damacus/unifi-release-announcer/issues/278)) ([57dfa78](https://github.com/damacus/unifi-release-announcer/commit/57dfa782217153712ae1f704f384889cb8e201bc))
+* **deps:** update jdx/mise-action action to v5 ([#280](https://github.com/damacus/unifi-release-announcer/issues/280)) ([cb33090](https://github.com/damacus/unifi-release-announcer/commit/cb33090fb16aa357d4fd70c0db91bd13371e77f6))
+* **deps:** update rust crate wiremock to 0.6.5 ([#268](https://github.com/damacus/unifi-release-announcer/issues/268)) ([06936ed](https://github.com/damacus/unifi-release-announcer/commit/06936ed9385c0a6f8c0d979ac2528faffa6a082e))
+* **deps:** update rust to v1.99.0 ([#282](https://github.com/damacus/unifi-release-announcer/issues/282)) ([692c1c4](https://github.com/damacus/unifi-release-announcer/commit/692c1c44463c402148d53fab7aa27d89d188af71))
+
 ## [0.3.0](https://github.com/damacus/unifi-release-announcer/compare/unifi-release-announcer-v0.2.14...unifi-release-announcer-v0.3.0) (2026-10-01)
 
 
