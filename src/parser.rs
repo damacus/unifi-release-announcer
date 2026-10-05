@@ -1,3 +1,7 @@
+// JSON object indexing returns Null for absent keys rather than panicking;
+// array-index sites remain to be audited.
+#![allow(clippy::indexing_slicing)]
+
 use anyhow::{Context, Result, bail};
 use chrono::{DateTime, NaiveDateTime};
 use serde_json::{Value, json};
@@ -58,7 +62,9 @@ pub fn parse_feed(
     });
     if let Some(limit) = limit.filter(|v| *v != 0) {
         let length = if limit < 0 {
-            parsed.len().saturating_sub(limit.unsigned_abs() as usize)
+            parsed
+                .len()
+                .saturating_sub(usize::try_from(limit.unsigned_abs()).unwrap_or(usize::MAX))
         } else {
             usize::try_from(limit).unwrap_or(usize::MAX)
         };

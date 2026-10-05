@@ -3,7 +3,7 @@ use crate::{
     release::{Release, format_message},
 };
 use anyhow::{Result, bail};
-use serde_json::json;
+use serde_json::{Value, json};
 use serenity::{
     http::{Http, HttpBuilder, MessagePagination},
     model::{
@@ -18,9 +18,9 @@ pub struct DiscordHttp {
     channel_id: ChannelId,
 }
 
-fn safe_error(error: serenity::Error) -> anyhow::Error {
+fn safe_error(error: &serenity::Error) -> anyhow::Error {
     match error {
-        serenity::Error::Http(ref e) if e.status_code().is_some() => anyhow::anyhow!(
+        serenity::Error::Http(e) if e.status_code().is_some() => anyhow::anyhow!(
             "Discord HTTP status {}",
             e.status_code().map_or(0, |s| s.as_u16())
         ),
@@ -28,6 +28,7 @@ fn safe_error(error: serenity::Error) -> anyhow::Error {
     }
 }
 
+#[must_use]
 pub fn classify_send_error(error: &serenity::Error) -> PostOutcome {
     if let serenity::Error::Http(e) = error
         && let Some(status) = e.status_code()
@@ -59,12 +60,15 @@ impl DiscordHttp {
     }
     pub async fn validate(&self) -> Result<()> {
         tokio::time::timeout(Duration::from_secs(30), async {
-            self.http.get_current_user().await.map_err(safe_error)?;
+            self.http
+                .get_current_user()
+                .await
+                .map_err(|e| safe_error(&e))?;
             let channel = self
                 .http
                 .get_channel(self.channel_id)
                 .await
-                .map_err(safe_error)?;
+                .map_err(|e| safe_error(&e))?;
             match channel {
                 Channel::Guild(ref c) if supported(c.kind) => Ok(()),
                 Channel::Private(_) => Ok(()),
@@ -79,7 +83,7 @@ impl DiscordHttp {
             .http
             .get_channel(self.channel_id)
             .await
-            .map_err(safe_error)?;
+            .map_err(|e| safe_error(&e))?;
         if let Channel::Guild(channel) = &channel
             && channel.kind == ChannelType::Forum
         {
@@ -87,12 +91,12 @@ impl DiscordHttp {
                 .http
                 .get_guild_active_threads(channel.guild_id)
                 .await
-                .map_err(safe_error)?;
+                .map_err(|e| safe_error(&e))?;
             let archived = self
                 .http
                 .get_channel_archived_public_threads(self.channel_id, None, Some(50))
                 .await
-                .map_err(safe_error)?;
+                .map_err(|e| safe_error(&e))?;
             let mut contents = Vec::new();
             let mut visited = std::collections::HashSet::new();
             for thread in active
@@ -108,7 +112,7 @@ impl DiscordHttp {
                     .http
                     .get_message(thread.id, MessageId::new(thread.id.get()))
                     .await
-                    .map_err(safe_error)?;
+                    .map_err(|e| safe_error(&e))?;
                 contents.push(message.content);
             }
             return Ok(contents);
@@ -121,7 +125,8 @@ impl DiscordHttp {
         let mut contents = Vec::new();
         let mut before = None;
         while contents.len() < 200 {
-            let limit = (200 - contents.len()).min(100) as u8;
+            // Bounded to [1, 100] by the loop guard and min() — the fallback is unreachable.
+            let limit = u8::try_from((200 - contents.len()).min(100)).unwrap_or(100);
             let messages = self
                 .http
                 .get_messages(
@@ -130,7 +135,7 @@ impl DiscordHttp {
                     Some(limit),
                 )
                 .await
-                .map_err(safe_error)?;
+                .map_err(|e| safe_error(&e))?;
             let count = messages.len();
             if count == 0 {
                 break;
@@ -160,7 +165,7 @@ impl DiscordHttp {
         .map_err(|_| {
             anyhow::anyhow!("verification send outcome uncertain; inspect channel before retry")
         })?
-        .map_err(safe_error)?;
+        .map_err(|e| safe_error(&e))?;
         tracing::info!(message_id = %sent.id, "verification message sent");
         // Keep a separate cleanup budget even if read-back fails or times out.
         // Three bounded stages cap the complete lifecycle at 90 seconds.
@@ -170,17 +175,22 @@ impl DiscordHttp {
         )
         .await
         .map_err(|_| anyhow::anyhow!("verification read-back timed out"))
-        .and_then(|result| result.map_err(safe_error));
+        .and_then(|result| result.map_err(|e| safe_error(&e)));
         let cleanup = tokio::time::timeout(
             Duration::from_secs(30),
             self.http.delete_message(self.channel_id, sent.id, None),
         )
         .await
         .map_err(|_| anyhow::anyhow!("verification cleanup timed out; remove message {}", sent.id))
-        .and_then(|result| result.map_err(safe_error));
+        .and_then(|result| result.map_err(|e| safe_error(&e)));
         cleanup?;
         let check = check?;
-        if check.content != message["content"].as_str().unwrap_or_default() {
+        if check.content
+            != message
+                .get("content")
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+        {
             bail!("verification message content mismatch");
         }
         tracing::info!(message_id = %sent.id, "verification message read back and removed");
@@ -188,7 +198,7 @@ impl DiscordHttp {
     }
 }
 
-fn supported(kind: ChannelType) -> bool {
+const fn supported(kind: ChannelType) -> bool {
     matches!(
         kind,
         ChannelType::Text
