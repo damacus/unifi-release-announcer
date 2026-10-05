@@ -41,6 +41,9 @@ impl PollState {
             self.remembered.push_back(url.to_owned());
         }
     }
+    // Driven on a `current_thread` runtime via `&mut Box::pin` in main —
+    // the future is never spawned across threads.
+    #[allow(clippy::future_not_send)]
     pub async fn poll(
         &mut self,
         source: &impl Source,

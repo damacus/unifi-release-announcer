@@ -53,10 +53,11 @@ impl Acceptance {
         self.failures.is_empty()
     }
 
-    pub fn fail(&mut self, error: impl ToString) {
+    pub fn fail(&mut self, error: &str) {
         self.failures.push(error.to_string());
     }
 
+    #[must_use]
     pub fn finish(self, container: String, image_id: Option<String>, elapsed: f64) -> Summary {
         let passed = self.failures.is_empty()
             && elapsed >= 86400.0
@@ -76,6 +77,13 @@ impl Acceptance {
     }
 }
 
+// The f64->u64 cast is guarded by the ensure! above: finite, non-negative,
+// and strictly below 2^64 — no truncation, sign loss, or UB is possible.
+#[allow(
+    clippy::as_conversions,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 pub fn working_set(usage: &str) -> anyhow::Result<u64> {
     let amount = usage.split('/').next().unwrap_or_default().trim();
     let number_end = amount
@@ -89,13 +97,14 @@ pub fn working_set(usage: &str) -> anyhow::Result<u64> {
         "MB" => 1_000_000.0,
         "GB" => 1_000_000_000.0,
         "KiB" => 1024.0,
-        "MiB" => 1048576.0,
-        "GiB" => 1073741824.0,
+        "MiB" => 1_048_576.0,
+        "GiB" => 1_073_741_824.0,
         _ => anyhow::bail!("unrecognised Docker memory units"),
     };
     let bytes = number * multiplier;
     anyhow::ensure!(
-        bytes.is_finite() && bytes >= 0.0 && bytes < u64::MAX as f64,
+        // 2^64 in f64 — u64::MAX itself is not exactly representable.
+        bytes.is_finite() && (0.0..18_446_744_073_709_551_616.0).contains(&bytes),
         "invalid Docker memory value"
     );
     Ok(bytes as u64)
@@ -153,8 +162,8 @@ mod tests {
     }
     #[test]
     fn docker_units_and_malformed_values() {
-        assert_eq!(working_set("2.5MiB / 100MiB").unwrap(), 2621440);
-        assert_eq!(working_set("900kB / 1GB").unwrap(), 900000);
+        assert_eq!(working_set("2.5MiB / 100MiB").unwrap(), 2_621_440);
+        assert_eq!(working_set("900kB / 1GB").unwrap(), 900_000);
         for invalid in ["NaNMiB", "2TB", "-1MiB", "infB", "", "1.2.3MiB"] {
             assert!(working_set(invalid).is_err(), "{invalid}");
         }
