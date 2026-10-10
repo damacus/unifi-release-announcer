@@ -1,4 +1,4 @@
 [tools]
 rust = "1.99.0"
 "npm:@fission-ai/openspec" = "1.14.0"
-uv = "0.12.21"
+uv = "0.12.24"
