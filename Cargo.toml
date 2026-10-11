@@ -17,8 +17,8 @@ serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 serenity = { version = "0.12", default-features = false, features = ["builder", "http", "model", "rustls_backend"] }
 tokio = { version = "1", features = ["rt", "macros", "time", "signal", "process"] }
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json"] }
 
 [dev-dependencies]
 wiremock = "0.6.5"
