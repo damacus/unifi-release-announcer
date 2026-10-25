@@ -49,6 +49,7 @@ fn allowed(title: &str, tag: &str) -> bool {
     .any(|pattern| title.contains(pattern))
 }
 
+#[must_use]
 pub fn select_latest(items: &[RawRelease], tags: &[String]) -> Vec<Release> {
     tags.iter()
         .filter_map(|tag| {
@@ -86,24 +87,27 @@ pub fn select_latest(items: &[RawRelease], tags: &[String]) -> Vec<Release> {
 }
 
 static MARKDOWN: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
+    // Literal pattern — an invalid regex would fail every escape_title test.
+    #[allow(clippy::expect_used)]
+    let regex = Regex::new(
     r#"(?m)(?P<url><[^: >]+:/[^ >]+>|(?:https?|steam)://[^\s<]+[^<.,:;"'\]\s])|(?P<markdown>[_\\~|*\x60]|^>(?:>>)?\s|\[.+\]\(.+\)|^#{1,3}|^\s*-)"#
-).expect("constant Markdown expression")
+).expect("constant Markdown expression");
+    regex
 });
 
 pub fn escape_title(title: &str) -> String {
     MARKDOWN
         .replace_all(title, |caps: &Captures<'_>| {
-            if let Some(url) = caps.name("url") {
-                url.as_str().to_owned()
-            } else {
-                format!("\\{}", &caps["markdown"])
-            }
+            caps.name("url").map_or_else(
+                || format!("\\{}", caps.name("markdown").map_or("", |m| m.as_str())),
+                |url| url.as_str().to_owned(),
+            )
         })
         .replace('[', "\\[")
         .replace(']', "\\]")
 }
 
+#[must_use]
 pub fn format_message(release: &Release) -> String {
     let title = escape_title(&release.title);
     let lower = title.to_lowercase();

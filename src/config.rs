@@ -57,6 +57,8 @@ pub struct Config {
 }
 
 impl Config {
+    // Designated config loader — the only sanctioned env::var call site.
+    #[allow(clippy::disallowed_methods)]
     pub fn from_env() -> Result<Self> {
         let token = env::var("DISCORD_BOT_TOKEN").unwrap_or_default();
         if token.trim().is_empty() {
