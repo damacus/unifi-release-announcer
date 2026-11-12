@@ -12,9 +12,12 @@
       "rangeStrategy": "bump"
     },
     {
-      "description": "Require passing CI and 24-hour release age for minor auto-merge",
+      "description": "Require passing CI and 24-hour release age for non-major auto-merge",
       "matchUpdateTypes": [
-        "minor"
+        "minor",
+        "patch",
+        "digest",
+        "pin"
       ],
       "automerge": true,
       "automergeType": "pr",
@@ -27,8 +30,6 @@
       "description": "Keep major upgrades and unaged update types manual",
       "matchUpdateTypes": [
         "major",
-        "digest",
-        "pin",
         "pinDigest",
         "lockFileMaintenance",
         "rollback",
