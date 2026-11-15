@@ -5,3 +5,8 @@
 /memory-evidence/
 /site/
 /.venv/
+
+# Python
+__pycache__/
+*.egg-info/
+.coverage
