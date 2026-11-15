@@ -1,3 +1,46 @@
+#![warn(
+    clippy::pedantic,
+    clippy::nursery,
+    clippy::cargo,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::exit,
+    clippy::dbg_macro,
+    clippy::todo,
+    clippy::unimplemented,
+    clippy::unreachable,
+    clippy::undocumented_unsafe_blocks,
+    clippy::as_conversions
+)]
+#![allow(
+    // Transitive duplicate versions are outside our control.
+    clippy::multiple_crate_versions,
+    // Error behaviour is documented at module level, not via per-fn
+    // Errors sections; the public surface is consumed internally.
+    clippy::missing_errors_doc,
+    clippy::missing_panics_doc,
+    // Function length is governed by cognitive-complexity, not lines.
+    clippy::too_many_lines,
+    // Licence/keyword metadata is a maintainer decision, not a lint.
+    clippy::cargo_common_metadata,
+)]
+#![cfg_attr(
+    test,
+    allow(
+        clippy::unwrap_used,
+        clippy::expect_used,
+        clippy::panic,
+        clippy::indexing_slicing,
+        clippy::unreachable,
+        clippy::disallowed_methods,
+        clippy::future_not_send,
+        clippy::assert_is_empty,
+        // Fake/test impls are async only because the real trait is.
+        clippy::unused_async_trait_impl,
+    )
+)]
 use anyhow::Result;
 use clap::Parser;
 use std::time::Duration;
@@ -50,10 +93,7 @@ async fn main() -> Result<()> {
             result = &mut poll => result,
             signal = &mut shutdown => {
                 signal?;
-                match tokio::time::timeout(Duration::from_secs(30), &mut poll).await {
-                    Ok(result) => { if result.is_err() { tracing::warn!("in-flight poll failed during shutdown"); } }
-                    Err(_) => tracing::warn!("in-flight poll cancelled at shutdown deadline"),
-                }
+                if let Ok(result) = tokio::time::timeout(Duration::from_secs(30), &mut poll).await { if result.is_err() { tracing::warn!("in-flight poll failed during shutdown"); } } else { tracing::warn!("in-flight poll cancelled at shutdown deadline") }
                 break;
             }
         };

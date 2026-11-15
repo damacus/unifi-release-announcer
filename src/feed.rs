@@ -13,6 +13,7 @@ pub struct GraphQl {
     url: String,
 }
 
+#[must_use]
 pub fn feed_payload(tags: &[String]) -> Value {
     json!({ "query": include_str!("feed.graphql"), "variables": {
         "tags": tags, "betas": [], "alphas": [], "offset": 0, "limit": 50,
